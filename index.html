@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3P21T5KZN9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3P21T5KZN9');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisiMuseum — Find Your Next Museum</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+/* SOCIAL SHARE */
+.panel-share { display: flex; gap: 10px; justify-content: center; margin-top: 24px; padding-top: 20px; border-top: 1px dashed var(--cream-dark); }
+.share-btn { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 20px; border: 1px solid var(--gold); 
+    background: transparent; color: var(--navy); font-size: 0.75rem; font-weight: 500; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+.share-btn:hover { background: var(--gold); color: var(--white); }
+.share-btn svg { width: 14px; height: 14px; fill: currentColor; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --gold: #C9A84C; --gold-light: #E8D5A3;
+            --navy: #0D1B2A; --navy-mid: #1B2E45; --navy-light: #2C4A68;
+            --cream: #F7F3EC; --cream-dark: #EDE7D9;
+            --text-dark: #1a1a1a; --text-muted: #7a7060;
+            --white: #FFFFFF; --card-shadow: 0 4px 30px rgba(13,27,42,0.08);
+        }
+        body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text-dark); min-height: 100vh; }
+
+        /* LANG SWITCHER */
+        .lang-switcher { position: fixed; top: 16px; right: 16px; z-index: 200; display: flex; flex-direction: column; gap: 6px; }
+        .lang-btn { width: 40px; height: 30px; border-radius: 4px; border: 2px solid transparent; cursor: pointer;
+            font-size: 1.35rem; line-height: 1; display: flex; align-items: center; justify-content: center;
+            background: rgba(13,27,42,0.6); backdrop-filter: blur(8px); transition: all 0.2s; opacity: 0.5; }
+        .lang-btn:hover { opacity: 1; border-color: var(--gold); }
+        .lang-btn.active { opacity: 1; border-color: var(--gold); background: rgba(201,168,76,0.2); }
+
+        /* HEADER */
+        header { background: var(--navy); position: relative; overflow: hidden; padding: 80px 20px 60px; text-align: center; }
+        header::before { content:''; position:absolute; inset:0;
+            background: radial-gradient(ellipse at 20% 50%, rgba(201,168,76,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 20%, rgba(44,74,104,0.6) 0%, transparent 50%);
+            pointer-events:none; }
+        header::after { content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+        .logo-line { display:flex; align-items:center; justify-content:center; gap:18px; margin-bottom:12px; }
+        .logo-ornament { width:40px; height:1px; background: linear-gradient(90deg, transparent, var(--gold)); }
+        .logo-ornament.right { background: linear-gradient(90deg, var(--gold), transparent); }
+        h1 { font-family:'Cormorant Garamond',serif; font-size:clamp(2.2rem,5vw,3.5rem); font-weight:300; letter-spacing:0.25em; color:var(--white); }
+        h1 span { color:var(--gold); }
+        .subtitle { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.1rem; color:var(--gold-light); margin-bottom:40px; letter-spacing:0.05em; opacity:0.85; }
+
+        /* SEARCH */
+        .search-bar { display:flex; align-items:center; max-width:560px; margin:0 auto 16px;
+            background:rgba(255,255,255,0.07); border:1px solid rgba(201,168,76,0.3); border-radius:4px;
+            overflow:hidden; backdrop-filter:blur(10px); transition:border-color 0.3s; }
+        .search-bar:focus-within { border-color:var(--gold); }
+        .search-icon { padding:0 16px; color:var(--gold); flex-shrink:0; }
+        #citySearch { flex:1; padding:16px 0; background:transparent; border:none; outline:none;
+            font-family:'DM Sans',sans-serif; font-size:0.95rem; color:var(--white); letter-spacing:0.02em; }
+        #citySearch::placeholder { color:rgba(255,255,255,0.35); }
+
+        /* FILTERS */
+        .filters { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+        .filter-btn { padding:6px 16px; border-radius:2px; border:1px solid rgba(201,168,76,0.25); background:transparent;
+            color:rgba(255,255,255,0.5); font-family:'DM Sans',sans-serif; font-size:0.78rem; letter-spacing:0.08em;
+            cursor:pointer; transition:all 0.2s; text-transform:uppercase; }
+        .filter-btn:hover, .filter-btn.active { border-color:var(--gold); color:var(--gold); background:rgba(201,168,76,0.08); }
+        .filter-btn.unusual-btn { border-color:rgba(196,168,232,0.3); color:rgba(196,168,232,0.6); }
+        .filter-btn.unusual-btn:hover, .filter-btn.unusual-btn.active { border-color:#c4a8e8; color:#c4a8e8; background:rgba(196,168,232,0.08); }
+
+        /* STATS BAR */
+        .stats-bar { background:var(--navy-mid); padding:14px 40px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(201,168,76,0.15); }
+        .stats-info { font-size:0.8rem; color:rgba(255,255,255,0.45); letter-spacing:0.05em; }
+        .stats-info strong { color:var(--gold); font-weight:500; }
+        .view-toggle { display:flex; gap:4px; }
+        .view-btn { padding:5px 8px; border:1px solid rgba(201,168,76,0.2); background:transparent; cursor:pointer; border-radius:2px; color:rgba(255,255,255,0.35); transition:all 0.2s; }
+        .view-btn.active, .view-btn:hover { border-color:var(--gold); color:var(--gold); }
+
+        /* MAIN */
+        main { max-width:1300px; margin:0 auto; padding:50px 30px; }
+        .section-header { margin-bottom:30px; display:flex; align-items:baseline; gap:16px; }
+        .section-title { font-family:'Cormorant Garamond',serif; font-size:1.8rem; font-weight:300; color:var(--navy); }
+        .section-line { flex:1; height:1px; background:linear-gradient(90deg, var(--cream-dark), transparent); }
+        .results { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:24px; }
+        .results.list-view { grid-template-columns:1fr; }
+
+        /* CARDS */
+        .museum-card { background:var(--white); border-radius:3px; overflow:hidden; box-shadow:var(--card-shadow);
+            border:1px solid rgba(0,0,0,0.04); transition:transform 0.3s, box-shadow 0.3s;
+            cursor:pointer; display:flex; flex-direction:column; animation:fadeUp 0.4s ease both; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+        .museum-card:hover { transform:translateY(-4px); box-shadow:0 12px 40px rgba(13,27,42,0.13); }
+        .results.list-view .museum-card { flex-direction:row; min-height:90px; }
+        .card-color-band { height:4px; background:linear-gradient(90deg, var(--navy-light), var(--gold)); flex-shrink:0; }
+        .results.list-view .card-color-band { height:auto; width:4px; }
+        .card-body { padding:22px 24px 20px; flex:1; display:flex; flex-direction:column; }
+        .results.list-view .card-body { flex-direction:row; align-items:center; gap:24px; padding:16px 24px; }
+        .museum-name { font-family:'Cormorant Garamond',serif; font-size:1.3rem; font-weight:400; color:var(--navy); line-height:1.25; margin-bottom:6px; }
+        .card-desc { font-size:0.82rem; color:var(--text-muted); line-height:1.5; }
+        .results.list-view .card-desc { display:none; }
+        .card-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; padding-top:14px; }
+        .results.list-view .card-tags { margin-top:0; padding-top:0; flex-shrink:0; }
+        .tag { padding:3px 10px; border-radius:2px; font-size:0.7rem; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; }
+        .tag-city { background:var(--navy); color:var(--gold-light); }
+        .tag-type { background:var(--cream-dark); color:var(--text-muted); }
+        .tag-unusual { background:#1e0f35; color:#c4a8e8; }
+        .card-link-hint { margin-top:14px; font-size:0.75rem; letter-spacing:0.07em; text-transform:uppercase; color:var(--gold); opacity:0.8; }
+
+        /* EMPTY STATE */
+        .empty-state { grid-column:1/-1; text-align:center; padding:80px 20px; }
+        .empty-icon { font-size:3rem; margin-bottom:16px; opacity:0.3; }
+        .empty-title { font-family:'Cormorant Garamond',serif; font-size:1.6rem; color:var(--navy); margin-bottom:8px; }
+        .empty-sub { font-size:0.85rem; color:var(--text-muted); }
+
+        /* DETAIL PANEL */
+        .panel-overlay { display:none; position:fixed; inset:0; background:rgba(13,27,42,0.65); z-index:100; backdrop-filter:blur(3px); }
+        .panel-overlay.open { display:block; }
+        @keyframes slideIn { from{transform:translateX(100%)} to{transform:translateX(0)} }
+        .detail-panel { position:fixed; top:0; right:0; bottom:0; width:min(600px,100vw); background:var(--cream); z-index:101; overflow-y:auto; animation:slideIn 0.35s cubic-bezier(0.16,1,0.3,1); display:flex; flex-direction:column; }
+        .panel-header { background:var(--navy); padding:32px 32px 28px; position:sticky; top:0; z-index:10; border-bottom:1px solid rgba(201,168,76,0.2); }
+        .panel-close { position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.08); border:1px solid rgba(201,168,76,0.2); color:var(--gold-light); width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+        .panel-close:hover { background:rgba(201,168,76,0.15); border-color:var(--gold); color:var(--gold); }
+        .panel-city-tag { font-size:0.72rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
+        .panel-title { font-family:'Cormorant Garamond',serif; font-size:clamp(1.6rem,4vw,2.2rem); font-weight:300; color:var(--white); line-height:1.2; margin-bottom:10px; }
+        .panel-type-badge { display:inline-block; padding:3px 12px; background:rgba(201,168,76,0.15); border:1px solid rgba(201,168,76,0.25); border-radius:2px; font-size:0.75rem; color:var(--gold-light); letter-spacing:0.05em; }
+        .panel-body { padding:32px; flex:1; }
+        .panel-loading { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; gap:16px; }
+        .loading-spinner { width:36px; height:36px; border:2px solid var(--cream-dark); border-top-color:var(--gold); border-radius:50%; animation:spin 0.8s linear infinite; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        .loading-text { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1rem; color:var(--text-muted); }
+        .panel-section { margin-bottom:32px; }
+        .panel-section-title { font-size:0.7rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--gold); margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid var(--cream-dark); }
+        .panel-intro { font-family:'Cormorant Garamond',serif; font-size:1.15rem; line-height:1.7; color:var(--text-dark); }
+        .masterpiece-list { display:flex; flex-direction:column; gap:12px; }
+        .masterpiece-item { display:flex; gap:14px; align-items:flex-start; padding:14px 16px; background:var(--white); border-radius:3px; border-left:3px solid var(--gold); box-shadow:var(--card-shadow); }
+        .masterpiece-num { font-family:'Cormorant Garamond',serif; font-size:1.4rem; color:var(--gold); line-height:1; flex-shrink:0; width:24px; text-align:center; }
+        .masterpiece-name { font-weight:500; font-size:0.9rem; color:var(--navy); margin-bottom:2px; }
+        .masterpiece-detail { font-size:0.78rem; color:var(--text-muted); line-height:1.4; }
+        .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .info-item { background:var(--white); padding:12px 16px; border-radius:3px; box-shadow:var(--card-shadow); }
+        .info-label { font-size:0.68rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); margin-bottom:4px; }
+        .info-value { font-size:0.88rem; color:var(--navy); font-weight:500; }
+        .tips-list { display:flex; flex-direction:column; gap:8px; }
+        .tip-item { display:flex; gap:10px; font-size:0.85rem; color:var(--text-dark); line-height:1.5; }
+        .tip-icon { flex-shrink:0; }
+        .panel-cta { display:block; text-align:center; padding:14px; background:var(--navy); color:var(--gold); text-decoration:none; border-radius:3px; font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; transition:background 0.2s; margin-top:8px; }
+        .panel-cta:hover { background:var(--navy-light); }
+        footer { text-align:center; padding:40px; font-size:0.75rem; color:var(--text-muted); border-top:1px solid var(--cream-dark); letter-spacing:0.05em; }
+        footer span { color:var(--gold); }
+.header-top-actions {
+position: absolute;
+    top: 15px;
+    left: 15px; /* Changé de 'right' à 'left' */
+    z-index: 10;
+}
+
+.share-icon-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+}
+
+.share-icon-btn:hover {
+    background: white;
+    color: black;
+    transform: translateY(-2px);
+}
+    </style>
+</head>
+<body>
+
+<div class="lang-switcher">
+    <button class="lang-btn active" onclick="setLang('en')" title="English">&#127468;&#127463;</button>
+    <button class="lang-btn" onclick="setLang('fr')" title="Français">&#127467;&#127479;</button>
+    <button class="lang-btn" onclick="setLang('es')" title="Español">&#127466;&#127480;</button>
+</div>
+
+<header>
+<header style="position: relative;">
+    <div class="header-top-actions">
+        <button id="shareBtn" class="share-icon-btn" aria-label="Partager">
+            <!-- SVG de l'icône -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                <polyline points="16 6 12 2 8 6"></polyline>
+                <line x1="12" y1="2" x2="12" y2="15"></line>
+            </svg>
+        </button>
+    </div>
+    <div class="logo-line">
+        <div class="logo-ornament"></div>
+        <h1>VISI<span>MUSEUM</span></h1>
+        <div class="logo-ornament right"></div>
+    </div>
+    <p class="subtitle" data-i18n="subtitle"></p>
+    
+    <div class="search-bar">
+        <div class="search-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+            </svg>
+        </div>
+        <input type="text" id="citySearch" autocomplete="off">
+    </div>
+    
+    <div class="filters">
+        <button class="filter-btn active" onclick="setFilter('all',this)" data-i18n="filterAll"></button>
+        <button class="filter-btn" onclick="setFilter('Art',this)" data-i18n="filterArt"></button>
+        <button class="filter-btn" onclick="setFilter('History',this)" data-i18n="filterHistory"></button>
+        <button class="filter-btn" onclick="setFilter('Science',this)" data-i18n="filterScience"></button>
+        <button class="filter-btn" onclick="setFilter('Modern',this)" data-i18n="filterModern"></button>
+        <button class="filter-btn" onclick="setFilter('Nature',this)" data-i18n="filterNature"></button>
+        <button class="filter-btn unusual-btn" onclick="setFilter('Unusual',this)" data-i18n="filterUnusual"></button>
+    </div>
+</header>
+
+<div class="stats-bar">
+    <div class="stats-info" id="statsText"></div>
+    <div class="view-toggle">
+        <button class="view-btn active" onclick="setView('grid',this)" title="Grid">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+            </svg>
+        </button>
+        <button class="view-btn" onclick="setView('list',this)" title="List">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+        </button>
+    </div>
+</div>
+
+<main>
+    <div class="section-header">
+        <h2 class="section-title" id="sectionTitle"></h2>
+        <div class="section-line"></div>
+    </div>
+    <div class="results" id="resultsGrid"></div>
+</main>
+
+<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+<div class="detail-panel" id="detailPanel" style="display:none">
+    <div class="panel-header">
+        <button class="panel-close" onclick="closePanel()">&#x2715;</button>
+        <div class="panel-city-tag" id="panelCity"></div>
+        <h2 class="panel-title" id="panelTitle"></h2>
+        <span class="panel-type-badge" id="panelType"></span>
+    </div>
+    <div class="panel-body" id="panelBody"></div>
+</div>
+
+<footer>&copy; 2025 <span>VisiMuseum</span> &mdash; <span data-i18n="footerRights"></span></footer>
+
+<script>
+// ===================== SHARE LOGIC =====================
+document.addEventListener('DOMContentLoaded', () => {
+    const shareBtn = document.getElementById('shareBtn');
+    
+    if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+            const shareData = {
+                title: 'VISIMUSEUM',
+                // Utilise la clé 'subtitle' de tes traductions
+                text: t('subtitle') || 'Explore the greatest museums of the world',
+                url: window.location.href
+            };
+
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                } else {
+                    // Option de secours pour PC/Anciens navigateurs
+                    await navigator.clipboard.writeText(window.location.href);
+                    // Utilise une alerte simple ou personnalisée
+                    alert(lang === 'fr' ? 'Lien copié !' : (lang === 'es' ? '¡Enlace copiado!' : 'Link copied!'));
+                }
+            } catch (err) {
+                console.warn('Share failed or cancelled');
+            }
+        });
+    }
+});
+// ===================== TRANSLATIONS =====================
+const i18n = {
+    en: {
+	shareTitle: "Share this museum",
+        subtitle: "Explore the greatest museums of the world",
+        searchPlaceholder: "Search by city or museum name...",
+        filterAll:"All", filterArt:"Art", filterHistory:"History", filterScience:"Science",
+        filterModern:"Modern Art", filterNature:"Nature", filterUnusual:"✨ Unusual",
+        allMuseums:"All Museums", resultsFor:"Results for",
+        found:"museum found", foundPlural:"museums found",
+        noResult:"No museum found", noResultSub:"Try a different city or search term.",
+        seeDetails:"See details →",
+        loadingText:"Loading information...",
+        errorText:"Unable to load details. Visit the official website for more information.",
+        visitSite:"Visit official website →",
+        footerRights:"All rights reserved",
+        panelMasterpieces:"★ Must-see masterpieces", panelInfo:"Practical info", panelTips:"✓ Visit tips",
+        hoursLabel:"Hours", closedLabel:"Closed", priceLabel:"Prices", accessLabel:"Access",
+        aiPrompt:`You are a world museum expert. Generate a detailed fact sheet about the museum "{name}" in {city} (type: {type}). Reply ONLY in valid JSON, no markdown, no backticks, with exactly this structure: {"intro":"A captivating introduction (3-4 sentences).","masterpieces":[{"name":"Artwork name","detail":"Artist, date, and why unmissable (1-2 sentences)."},{"name":"...","detail":"..."},{"name":"...","detail":"..."},{"name":"...","detail":"..."},{"name":"...","detail":"..."}],"infos":{"horaires":"e.g. Tue-Sun 9am-6pm","fermeture":"e.g. Monday, Dec 25","prix":"e.g. £17 / Free under 18","acces":"e.g. Tube: Holborn"},"tips":["Practical tip 1","Practical tip 2","Practical tip 3"]}`
+    },
+    fr: {
+	shareTitle: "Partager ce musée",
+        subtitle: "Explorez les plus grands musées du monde",
+        searchPlaceholder: "Rechercher par ville ou par musée...",
+        filterAll:"Tous", filterArt:"Art", filterHistory:"Histoire", filterScience:"Science",
+        filterModern:"Art Moderne", filterNature:"Nature", filterUnusual:"✨ Insolites",
+        allMuseums:"Tous les musées", resultsFor:"Résultats pour",
+        found:"musée trouvé", foundPlural:"musées trouvés",
+        noResult:"Aucun musée trouvé", noResultSub:"Essayez une autre ville ou un autre terme.",
+        seeDetails:"Voir les détails →",
+        loadingText:"Chargement des informations...",
+        errorText:"Impossible de charger les détails. Visitez le site officiel.",
+        visitSite:"Visiter le site officiel →",
+        footerRights:"Tous droits réservés",
+        panelMasterpieces:"★ Chefs-d'œuvre incontournables", panelInfo:"Infos pratiques", panelTips:"✓ Conseils de visite",
+        hoursLabel:"Horaires", closedLabel:"Fermeture", priceLabel:"Tarifs", accessLabel:"Accès",
+        aiPrompt:`Tu es un expert en musées du monde. Génère une fiche détaillée sur le musée "{name}" à {city} (type: {type}). Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks, avec exactement cette structure : {"intro":"Un paragraphe d'introduction captivant (3-4 phrases).","masterpieces":[{"name":"Nom de l'œuvre","detail":"Artiste, date, et pourquoi incontournable (1-2 phrases)."},{"name":"...","detail":"..."},{"name":"...","detail":"..."},{"name":"...","detail":"..."},{"name":"...","detail":"..."}],"infos":{"horaires":"ex: Mar-Dim 9h-18h","fermeture":"ex: Lundi, 25 déc","prix":"ex: 17€ / Gratuit -18 ans","acces":"ex: Métro Palais-Royal"},"tips":["Conseil pratique 1","Conseil pratique 2","Conseil pratique 3"]}`
+    },
+    es: {
+	shareTitle: "Compartir este museo",
+        subtitle: "Explora los mejores museos del mundo",
+        searchPlaceholder: "Buscar por ciudad o nombre de museo...",
+        filterAll:"Todos", filterArt:"Arte", filterHistory:"Historia", filterScience:"Ciencia",
+        filterModern:"Arte Moderno", filterNature:"Naturaleza", filterUnusual:"✨ Insólitos",
+        allMuseums:"Todos los museos", resultsFor:"Resultados para",
+        found:"museo encontrado", foundPlural:"museos encontrados",
+        noResult:"Ningún museo encontrado", noResultSub:"Prueba con otra ciudad o término de búsqueda.",
+        seeDetails:"Ver detalles →",
+        loadingText:"Cargando información...",
+        errorText:"No se pudieron cargar los detalles. Visita el sitio oficial.",
+        visitSite:"Visitar sitio oficial →",
+        footerRights:"Todos los derechos reservados",
+        panelMasterpieces:"★ Obras maestras imprescindibles", panelInfo:"Información práctica", panelTips:"✓ Consejos de visita",
+        hoursLabel:"Horarios", closedLabel:"Cierre", priceLabel:"Precios", accessLabel:"Acceso",
+        aiPrompt:`Eres un experto en museos del mundo. Genera una ficha detallada sobre el museo "{name}" en {city} (tipo: {type}). Responde ÚNICAMENTE en JSON válido, sin markdown, sin backticks, con exactamente esta estructura: {"intro":"Un párrafo de introducción cautivador (3-4 frases).","masterpieces":[{"name":"Nombre de la obra","detail":"Artista, fecha y por qué es imprescindible (1-2 frases)."},{"name":"...","detail":"..."},{"name":"...","detail":"..."},{"name":"...","detail":"..."},{"name":"...","detail":"..."}],"infos":{"horaires":"ej: Mar-Dom 9h-18h","fermeture":"ej: Lunes, 25 dic","prix":"ej: 17€ / Gratis -18 años","acces":"ej: Metro Palais-Royal"},"tips":["Consejo práctico 1","Consejo práctico 2","Consejo práctico 3"]}`
+    }
+};
+
+let lang = 'en';
+
+function t(key) { return i18n[lang][key] || ''; }
+
+function setLang(l) {
+    lang = l;
+    document.querySelectorAll('.lang-btn').forEach((b, i) => {
+        b.classList.toggle('active', ['en','fr','es'][i] === l);
+    });
+    applyTranslations();
+    searchMuseums();
+}
+
+function applyTranslations() {
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+    const input = document.getElementById('citySearch');
+    if (input) input.placeholder = t('searchPlaceholder');
+}
+
+// ===================== MUSEUMS DATA =====================
+const museums = [
+// --- NOUVELLES PÉPITES ---
+
+    // FRANCE & MONACO
+    { name:"MUCEM", city:"Marseille", type:"Culture", desc:"A stunning seafront museum dedicated to Mediterranean civilizations and culture.", tags:["History","Art"], url:"https://www.mucem.org" },
+    { name:"Musée Océanographique", city:"Monaco", type:"Science & Nature", desc:"Built into a cliffside, this 'Temple of the Sea' houses giant aquariums and marine curiosities.", tags:["Science","Nature"], url:"https://musee.oceano.org" },
+    { name:"La Piscine", city:"Roubaix", type:"Art", desc:"An exceptional museum of art and industry located in a stunning former Art Deco swimming pool.", tags:["Art"], url:"https://www.roubaix-lapiscine.com" },
+
+    // EUROPE
+    { name:"The Design Museum", city:"London", type:"Design", desc:"The world's leading museum devoted to contemporary design in every form.", tags:["Art","Modern"], url:"https://designmuseum.org" },
+    { name:"Museum of Black Civilisations", city:"Dakar", type:"Culture", desc:"A vast complex celebrating African contributions to world history and arts.", tags:["History","Art"], url:"https://mcn.sn" },
+    { name:"Bourse de Commerce", city:"Paris", type:"Contemporary Art", desc:"The Pinault Collection housed in a restored circular grain exchange with a concrete cylinder by Tadao Ando.", tags:["Art","Modern"], url:"https://www.pinaultcollection.com" },
+    { name:"Louisiana Museum", city:"Humlebæk", type:"Modern Art", desc:"A perfect synthesis of art, architecture, and landscape on the Danish coast.", tags:["Art","Modern"], url:"https://www.louisiana.dk" },
+    { name:"Guggenheim Venice", city:"Venice", type:"Modern Art", desc:"Personal collection of Peggy Guggenheim in her unfinished 18th-century palazzo on the Grand Canal.", tags:["Art","Modern"], url:"https://www.guggenheim-venice.it" },
+
+    // USA & CANADA
+    { name:"The Getty Center", city:"Los Angeles", type:"Art", desc:"Spectacular architecture and gardens overlooking LA, with European and American art.", tags:["Art","History"], url:"https://www.getty.edu" },
+    { name:"Exploratorium", city:"San Francisco", type:"Science", desc:"A public learning laboratory exploring the world through science, art, and human perception.", tags:["Science"], url:"https://www.exploratorium.edu" },
+    { name:"ROM", city:"Toronto", type:"Universal Art", desc:"Canada's largest museum of world culture and natural history with its iconic 'Crystal' wing.", tags:["Art","Nature"], url:"https://www.rom.on.ca" },
+
+    // ASIA & PACIFIC
+    { name:"M+ Museum", city:"Hong Kong", type:"Visual Culture", desc:"Asia's first global museum of contemporary visual culture in the West Kowloon District.", tags:["Art","Modern"], url:"https://www.mplus.org.hk" },
+    { name:"National Gallery Australia", city:"Canberra", type:"Art", desc:"The largest art museum in Australia, featuring the world's largest collection of Aboriginal art.", tags:["Art"], url:"https://nga.gov.au" },
+    { name:"Museum of Future", city:"Dubai", type:"Science & Tech", desc:"An architectural marvel exploring the future of science, technology, and spirituality.", tags:["Science","Modern"], url:"https://museumofthefuture.ae" },
+
+    // INSOLITES (UNUSUAL)
+    { name:"Cupnoodles Museum", city:"Yokohama", type:"Unusual", desc:"An interactive journey through the history of instant ramen with hands-on workshops.", tags:["Unusual"], url:"https://www.cupnoodles-museum.jp" },
+    { name:"The Mini Bottle Gallery", city:"Oslo", type:"Unusual", desc:"The world's largest collection of miniature bottles — over 53,000 across three floors.", tags:["Unusual"], url:"https://minibottlegallery.com" },
+    { name:"Vrolik Museum", city:"Amsterdam", type:"Unusual", desc:"A vast collection of pathological specimens, embryos, and anatomical oddities.", tags:["Unusual","Science"], url:"https://www.amsterdamumc.org/en/vrolik-museum.htm" },
+    { name:"The Clown Museum", city:"Leipzig", type:"Unusual", desc:"Everything dedicated to the history of clowns, from circus posters to original costumes.", tags:["Unusual","Art"], url:"http://www.clown-museum.de" },
+    { name:"Kansas Barbed Wire Museum", city:"La Crosse", type:"Unusual", desc:"Dedicated to the 'Devil's Rope' — over 2,000 variations of barbed wire.", tags:["Unusual","History"], url:"http://www.enabling.org/ia/wire/" },
+    { name:"The Pencil Museum", city:"Keswick", type:"Unusual", desc:"Home of the world's first pencil and a secret spy pencil from WWII.", tags:["Unusual","History"], url:"https://www.derwentart.com/en-gb/c/about/the-pencil-museum" }, // LA VIRGULE ÉTAIT MANQUANTE ICI
+
+// JAPON
+    { name:"Ghibli Museum", city:"Mitaka", type:"Unusual", desc:"The whimsical world of Studio Ghibli, designed by Hayao Miyazaki himself.", tags:["Unusual","Art"], url:"https://www.ghibli-museum.jp" },
+    // FRANCE
+    { name:"Musée de la Magie", city:"Paris", type:"Unusual", desc:"Hidden in the vaults of the Marais, a mysterious collection of automata and illusions.", tags:["Unusual","History"], url:"https://www.museedelamagie.org" },
+    // ALLEMAGNE
+    { name:"Deutsches Spionagemuseum", city:"Berlin", type:"Unusual", desc:"Experience the high-tech history of espionage in the world's capital of spies.", tags:["Unusual","History"], url:"https://www.deutsches-spionagemuseum.de" },
+    // USA
+    { name:"Neon Museum", city:"Las Vegas", type:"Unusual", desc:"The 'Neon Boneyard' where iconic signs of vintage Las Vegas go to glow forever.", tags:["Unusual","Art"], url:"https://www.neonmuseum.org" },
+    // PORTUGAL
+    { name:"Museu Nacional dos Coches", city:"Lisbon", type:"Unusual", desc:"One of the finest collections of historical royal carriages in the world.", tags:["Unusual","History"], url:"http://museudoscoches.gov.pt" },
+    // ISLANDE
+    { name:"Perlan", city:"Reykjavik", type:"Unusual", desc:"A massive glass dome featuring a real indoor ice cave and a northern lights planetarium.", tags:["Unusual","Science"], url:"https://www.perlan.is" },
+// ITALIE
+    { name:"Galleria dell'Accademia", city:"Florence", type:"Renaissance", desc:"The home of Michelangelo's David and other masterpieces of Florentine sculpture.", tags:["Art","History"], url:"https://www.galleriaaccademiafirenze.it" },
+    // EGYPTE
+    { name:"Musée de Louxor", city:"Luxor", type:"Antiquities", desc:"A perfectly curated selection of artifacts from the ancient capital of Thebes.", tags:["History"], url:"https://egymonuments.gov.eg" },
+    // BRESIL
+    { name:"MASP", city:"São Paulo", type:"Art", desc:"Brazil's most vital museum, famous for its iconic glass-supported gallery 'floating' above the city.", tags:["Art"], url:"https://masp.org.br" },
+    // JAPON
+    { name:"Musée National de Kyoto", city:"Kyoto", type:"Japanese Art", desc:"One of Japan's three former imperial museums, focusing on pre-modern Japanese art.", tags:["Art","History"], url:"https://www.kyohaku.go.jp" },
+    // CANADA
+    { name:"Musée de l'Histoire du Canada", city:"Ottawa", type:"History", desc:"Discover the events, people and objects that have shaped the country's identity.", tags:["History"], url:"https://www.historymuseum.ca" },
+    // PARIS
+    { name:"Musée du Louvre", city:"Paris", type:"Art & History", desc:"The world's largest museum, home to the Mona Lisa and the Venus de Milo.", tags:["Art","History"], url:"https://www.louvre.fr" },
+    { name:"Musée d'Orsay", city:"Paris", type:"Impressionism", desc:"Impressionist masterpieces by Monet, Renoir and Van Gogh in a former railway station.", tags:["Art"], url:"https://www.musee-orsay.fr" },
+    { name:"Centre Pompidou", city:"Paris", type:"Contemporary Art", desc:"Inside-out architecture housing Europe's largest collection of modern and contemporary art.", tags:["Art","Modern"], url:"https://www.centrepompidou.fr" },
+    { name:"Musée de l'Orangerie", city:"Paris", type:"Impressionism", desc:"Monet's monumental Water Lilies in two oval rooms designed by the painter himself.", tags:["Art"], url:"https://www.musee-orangerie.fr" },
+    { name:"Musée Picasso", city:"Paris", type:"Modern Art", desc:"Over 5,000 works by Picasso in the elegant Hôtel Salé in the Marais district.", tags:["Art","Modern"], url:"https://www.museepicassoparis.fr" },
+    { name:"Musée de l'Homme", city:"Paris", type:"Anthropology", desc:"The history of humanity from its origins through artefacts from around the world.", tags:["Science","History"], url:"https://www.museedelhomme.fr" },
+    { name:"Musée des Arts Décoratifs", city:"Paris", type:"Design & Fashion", desc:"Centuries of design, fashion and decorative arts in a wing of the Louvre palace.", tags:["Art"], url:"https://madparis.fr" },
+    { name:"Cité des Sciences", city:"Paris", type:"Science", desc:"Europe's largest science museum with a geodesic dome, submarine and planetarium.", tags:["Science"], url:"https://www.cite-sciences.fr" },
+    { name:"Musée Rodin", city:"Paris", type:"Sculpture", desc:"The Thinker and The Kiss in Rodin's former studio and its beautiful garden.", tags:["Art"], url:"https://www.musee-rodin.fr" },
+    { name:"Musée Marmottan Monet", city:"Paris", type:"Impressionism", desc:"The world's largest Monet collection — over 300 works in a 19th-century hunting lodge.", tags:["Art"], url:"https://www.marmottan.fr" },
+    { name:"Musée de Cluny", city:"Paris", type:"Medieval Art", desc:"The Lady and the Unicorn tapestries and Roman baths beneath medieval Paris.", tags:["Art","History"], url:"https://www.musee-moyenage.fr" },
+    { name:"Palais de Tokyo", city:"Paris", type:"Contemporary Art", desc:"The most dynamic contemporary art space in Europe, open until midnight.", tags:["Art","Modern"], url:"https://www.palaisdetokyo.com" },
+    // NEW YORK
+    { name:"MoMA", city:"New York", type:"Modern Art", desc:"The world reference for modern art with Picasso, Warhol and Dalí.", tags:["Art","Modern"], url:"https://www.moma.org" },
+    { name:"Metropolitan Museum", city:"New York", type:"Universal Art", desc:"5,000 years of art history across all civilisations in a single extraordinary building.", tags:["Art","History"], url:"https://www.metmuseum.org" },
+    { name:"American Museum of Natural History", city:"New York", type:"Natural Sciences", desc:"Dinosaurs, a full-scale blue whale and cultures from across the world.", tags:["Science","Nature"], url:"https://www.amnh.org" },
+    { name:"Guggenheim New York", city:"New York", type:"Modern Art", desc:"Frank Lloyd Wright's spiralling architecture housing a landmark modern art collection.", tags:["Art","Modern"], url:"https://www.guggenheim.org" },
+    { name:"Brooklyn Museum", city:"New York", type:"Universal Art", desc:"One of the largest art museums in the US with an exceptional ancient Egyptian collection.", tags:["Art","History"], url:"https://www.brooklynmuseum.org" },
+    { name:"Whitney Museum", city:"New York", type:"American Art", desc:"The definitive collection of 20th and 21st century American art on the High Line.", tags:["Art","Modern"], url:"https://whitney.org" },
+    // LONDON
+    { name:"British Museum", city:"London", type:"World History", desc:"The Rosetta Stone and Elgin Marbles among 8 million objects spanning human civilisation.", tags:["History"], url:"https://www.britishmuseum.org" },
+    { name:"Tate Modern", city:"London", type:"Contemporary Art", desc:"Housed in a former power station on the banks of the Thames.", tags:["Art","Modern"], url:"https://www.tate.org.uk/visit/tate-modern" },
+    { name:"Victoria and Albert Museum", city:"London", type:"Decorative Arts", desc:"The world's largest museum dedicated to applied arts and design.", tags:["Art"], url:"https://www.vam.ac.uk" },
+    { name:"Natural History Museum", city:"London", type:"Natural Sciences", desc:"A blue whale skeleton and Darwin's meteorite collection in a cathedral-like building.", tags:["Science","Nature"], url:"https://www.nhm.ac.uk" },
+    { name:"Science Museum", city:"London", type:"Science", desc:"From Stephenson's Rocket to the Apollo 10 capsule — the history of human ingenuity.", tags:["Science"], url:"https://www.sciencemuseum.org.uk" },
+    { name:"National Gallery", city:"London", type:"Painting", desc:"Van Eyck to Cézanne — 2,300 paintings spanning 700 years of Western art.", tags:["Art","History"], url:"https://www.nationalgallery.org.uk" },
+    // EUROPE
+    { name:"Musée du Prado", city:"Madrid", type:"Painting", desc:"Velázquez, Goya and El Greco in one of Europe's greatest painting collections.", tags:["Art","History"], url:"https://www.museodelprado.es" },
+    { name:"Museo Reina Sofía", city:"Madrid", type:"Contemporary Art", desc:"Picasso's Guernica and masterpieces of Spanish surrealism.", tags:["Art","Modern"], url:"https://www.museoreinasofia.es" },
+    { name:"Thyssen-Bornemisza", city:"Madrid", type:"Universal Art", desc:"One of the world's finest private collections spanning 800 years of Western painting.", tags:["Art","History"], url:"https://www.museothyssen.org" },
+    { name:"Vatican Museums", city:"Rome", type:"Religious Art", desc:"The Sistine Chapel and pontifical collections gathered over 2,000 years.", tags:["Art","History"], url:"https://www.museivaticani.va" },
+    { name:"Museo Nazionale Romano", city:"Rome", type:"Archaeology", desc:"The finest sculptures and mosaics of Roman antiquity across four sites.", tags:["History"], url:"https://www.museonazionaleromano.beniculturali.it" },
+    { name:"Uffizi Gallery", city:"Florence", type:"Renaissance", desc:"Botticelli's Birth of Venus and masterpieces by Leonardo and Michelangelo.", tags:["Art","History"], url:"https://www.uffizi.it" },
+    { name:"Palazzo Pitti", city:"Florence", type:"Renaissance", desc:"A Renaissance palace with seven museums and the stunning Boboli Gardens.", tags:["Art","History"], url:"https://www.uffizi.it/en/pitti-palace" },
+    { name:"Rijksmuseum", city:"Amsterdam", type:"Golden Age", desc:"Rembrandt and Vermeer in a palace dedicated to the Dutch Golden Age.", tags:["Art","History"], url:"https://www.rijksmuseum.nl" },
+    { name:"Van Gogh Museum", city:"Amsterdam", type:"Post-Impressionism", desc:"The largest collection of Van Gogh's works — 200 paintings, 500 drawings.", tags:["Art"], url:"https://www.vangoghmuseum.nl" },
+    { name:"Kunsthistorisches Museum", city:"Vienna", type:"Universal Art", desc:"The Habsburg imperial collections in a stunning 19th-century palace.", tags:["Art","History"], url:"https://www.khm.at" },
+    { name:"Belvedere", city:"Vienna", type:"Art", desc:"Klimt's The Kiss displayed in a Baroque palace with a formal garden.", tags:["Art","History"], url:"https://www.belvedere.at" },
+    { name:"Pergamon Museum", city:"Berlin", type:"Archaeology", desc:"The reconstructed Gate of Babylon and Pergamon Altar at full scale.", tags:["History"], url:"https://www.smb.museum" },
+    { name:"Gemäldegalerie", city:"Berlin", type:"Painting", desc:"One of the world's finest collections of European paintings from the 13th to 18th centuries.", tags:["Art","History"], url:"https://www.smb.museum/museen-einrichtungen/gemaeldegalerie" },
+    { name:"Museo Guggenheim Bilbao", city:"Bilbao", type:"Contemporary Art", desc:"Frank Gehry's titanium masterpiece housing world-class contemporary art.", tags:["Art","Modern"], url:"https://www.guggenheim-bilbao.eus" },
+    { name:"Nationalmuseum", city:"Stockholm", type:"Art & Design", desc:"Eight centuries of Swedish and European painting, sculpture and decorative arts.", tags:["Art","History"], url:"https://www.nationalmuseum.se" },
+    { name:"Musée Royal de l'Afrique Centrale", city:"Brussels", type:"Ethnography", desc:"Unique collections on Central Africa, wildlife and Belgian colonial history.", tags:["History","Nature"], url:"https://www.africamuseum.be" },
+    { name:"Acropolis Museum", city:"Athens", type:"Archaeology", desc:"Parthenon sculptures displayed facing the Acropolis they once adorned.", tags:["History"], url:"https://www.theacropolismuseum.gr" },
+    { name:"Louvre-Lens", city:"Lens", type:"Art & History", desc:"A stunning satellite of the Louvre displaying masterpieces in a former mining region.", tags:["Art","History"], url:"https://www.louvrelens.fr" },
+    { name:"Musée d'Art Moderne de Lille", city:"Lille", type:"Modern Art", desc:"One of France's largest modern art collections with Picasso, Matisse and Calder.", tags:["Art","Modern"], url:"https://www.lamlm.fr" },
+    { name:"Pinakothek der Moderne", city:"Munich", type:"Modern Art", desc:"Four museums under one roof — art, design, architecture and works on paper.", tags:["Art","Modern"], url:"https://www.pinakothek.de" },
+    // RUSSIA / MIDDLE EAST / ASIA
+    { name:"Hermitage", city:"St Petersburg", type:"Art & History", desc:"3 million artworks in the former Winter Palace of the Russian tsars.", tags:["Art","History"], url:"https://www.hermitagemuseum.org" },
+    { name:"National Museum of Tokyo", city:"Tokyo", type:"Japanese Art", desc:"The world's largest collection of Asian art, founded in 1872.", tags:["Art","History"], url:"https://www.tnm.jp" },
+    { name:"teamLab Borderless", city:"Tokyo", type:"Digital Art", desc:"A labyrinth of immersive digital art environments where works flow beyond boundaries.", tags:["Art","Modern"], url:"https://borderless.teamlab.art" },
+    { name:"National Museum of China", city:"Beijing", type:"Chinese History", desc:"One million objects tracing 5,000 years of Chinese civilisation.", tags:["History"], url:"http://en.chnmuseum.cn" },
+    { name:"Shanghai Museum", city:"Shanghai", type:"Chinese Art", desc:"120,000 ancient bronzes, ceramics and calligraphy from imperial China.", tags:["Art","History"], url:"https://www.shanghaimuseum.net" },
+    { name:"National Palace Museum", city:"Taipei", type:"Chinese Art", desc:"The world's largest collection of imperial Chinese art.", tags:["Art","History"], url:"https://www.npm.gov.tw" },
+    { name:"Museum of Islamic Art", city:"Doha", type:"Islamic Art", desc:"I.M. Pei's architectural masterpiece housing 14 centuries of Islamic world art.", tags:["Art","History"], url:"https://mia.org.qa" },
+    { name:"Topkapi Palace", city:"Istanbul", type:"Ottoman Art", desc:"The heart of the Ottoman Empire with jewels, arms and manuscript collections.", tags:["Art","History"], url:"https://millisaraylar.gov.tr/saraylar/topkapi" },
+    { name:"Israel Museum", city:"Jerusalem", type:"Archaeology & Art", desc:"The Dead Sea Scrolls and one of the Middle East's largest art collections.", tags:["Art","History"], url:"https://www.imj.org.il" },
+    { name:"National Museum of Singapore", city:"Singapore", type:"History", desc:"Singapore's oldest museum tracing 700 years of the city-state's history.", tags:["History"], url:"https://www.nationalmuseum.sg" },
+    // AMERICAS
+    { name:"Smithsonian", city:"Washington DC", type:"Science & History", desc:"The world's largest museum complex — 19 museums all free to enter.", tags:["Science","History"], url:"https://www.si.edu" },
+    { name:"National Gallery of Art", city:"Washington DC", type:"Art", desc:"From Leonardo to Rothko — one of the world's great art collections, free admission.", tags:["Art","History"], url:"https://www.nga.gov" },
+    { name:"Art Institute of Chicago", city:"Chicago", type:"Art", desc:"Seurat's Sunday on La Grande Jatte and Grant Wood's American Gothic.", tags:["Art","History"], url:"https://www.artic.edu" },
+    { name:"Museo Nacional de Antropología", city:"Mexico City", type:"Archaeology", desc:"The Aztec calendar and pre-Hispanic civilisation treasures of Mexico.", tags:["History"], url:"https://www.mna.inah.gob.mx" },
+    { name:"Museo Frida Kahlo", city:"Mexico City", type:"Modern Art", desc:"The Blue House where the iconic Mexican painter lived and worked.", tags:["Art","Modern"], url:"https://www.museofridakahlo.org.mx" },
+    { name:"Museo del Oro", city:"Bogotá", type:"Archaeology", desc:"The world's largest collection of pre-Columbian goldwork — 55,000 pieces.", tags:["History"], url:"https://www.banrepcultural.org/bogota/museo-del-oro" },
+    { name:"MNBA", city:"Buenos Aires", type:"Latin American Art", desc:"The largest collection of Latin American art on the South American continent.", tags:["Art"], url:"https://www.mnba.gob.ar" },
+    { name:"Te Papa Tongarewa", city:"Wellington", type:"Maori Culture", desc:"New Zealand's national museum celebrating Maori culture and natural history.", tags:["History","Nature"], url:"https://www.tepapa.govt.nz" },
+    // AFRICA
+    { name:"Egyptian Museum", city:"Cairo", type:"Antiquities", desc:"The treasures of Tutankhamun and 120,000 pieces from ancient Egypt.", tags:["History"], url:"https://egyptianmuseum.org" },
+    { name:"Grand Egyptian Museum", city:"Giza", type:"Antiquities", desc:"The world's largest archaeological museum, built beside the Pyramids of Giza.", tags:["History"], url:"https://gem.gov.eg" },
+    { name:"South African National Gallery", city:"Cape Town", type:"Art", desc:"South African and international art spanning three centuries in the heart of Cape Town.", tags:["Art","History"], url:"https://www.iziko.org.za/museums/south-african-national-gallery" },
+
+    // ===== UNUSUAL MUSEUMS =====
+    { name:"Museum of Bad Art", city:"Boston", type:"Unusual", desc:"Dedicated to art too bad to be ignored — celebrating spectacular artistic failure.", tags:["Unusual","Art"], url:"https://museumofbadart.org" },
+    { name:"Sulabh International Museum of Toilets", city:"New Delhi", type:"Unusual", desc:"The complete history of the toilet from 2500 BC to the present day.", tags:["Unusual"], url:"https://www.sulabhtoiletmuseum.org" },
+    { name:"Museum of Broken Relationships", city:"Zagreb", type:"Unusual", desc:"Objects donated by people worldwide, each telling the story of a failed love affair.", tags:["Unusual"], url:"https://brokenships.com" },
+    { name:"International Spy Museum", city:"Washington DC", type:"Unusual", desc:"The world's largest collection of spy gadgets from real Cold War espionage to James Bond.", tags:["Unusual","History"], url:"https://www.spymuseum.org" },
+    { name:"Museum of Witchcraft and Magic", city:"Boscastle", type:"Unusual", desc:"The world's largest collection of witchcraft artefacts in a tiny Cornish fishing village.", tags:["Unusual","History"], url:"https://museumofwitchcraftandmagic.co.uk" },
+    { name:"Parasitological Museum", city:"Tokyo", type:"Unusual", desc:"An 8.8-metre tapeworm and 300 parasite specimens — the world's only parasitology museum.", tags:["Unusual","Science"], url:"https://www.kiseichu.org" },
+    { name:"Museum of Medieval Torture", city:"Prague", type:"Unusual", desc:"A chilling collection of authentic medieval torture devices across three floors.", tags:["Unusual","History"], url:"https://www.torturemuseum.net" },
+    { name:"Phallological Museum", city:"Reykjavik", type:"Unusual", desc:"The world's only museum dedicated to phallology — 215+ specimens from 93 species.", tags:["Unusual","Science"], url:"https://phallus.is" },
+    { name:"Mütter Museum", city:"Philadelphia", type:"Unusual", desc:"Medical oddities, anatomical specimens and pathological collections in a Victorian setting.", tags:["Unusual","Science"], url:"https://muttermuseum.org" },
+    { name:"International UFO Museum", city:"Roswell", type:"Unusual", desc:"Dedicated to the 1947 Roswell incident and extraterrestrial phenomena worldwide.", tags:["Unusual"], url:"https://www.roswellufomuseum.com" },
+    { name:"Museum of Failure", city:"Helsingborg", type:"Unusual", desc:"Products that bombed spectacularly — from Crystal Pepsi to the Ford Edsel.", tags:["Unusual"], url:"https://www.museumoffailure.com" },
+    { name:"Salt and Pepper Shaker Museum", city:"Gatlinburg", type:"Unusual", desc:"Over 20,000 salt and pepper shaker sets from around the world and across the centuries.", tags:["Unusual"], url:"https://thesaltandpeppershakermuseum.com" },
+    { name:"Museum of Jurassic Technology", city:"Los Angeles", type:"Unusual", desc:"A deliberately confusing museum blurring fact and fiction — nobody knows what's real.", tags:["Unusual"], url:"https://www.mjt.org" },
+    { name:"Cryptozoology Museum", city:"Portland", type:"Unusual", desc:"Dedicated to Bigfoot, the Loch Ness Monster and other creatures of legend.", tags:["Unusual","Science"], url:"https://www.cryptozoologymuseum.com" },
+    { name:"Hair Museum", city:"Avanos", type:"Unusual", desc:"Over 16,000 hair samples from women across the world hang from the ceiling of a cave.", tags:["Unusual"], url:"https://www.galipceramics.com" },
+    { name:"Momofuku Ando Instant Ramen Museum", city:"Osaka", type:"Unusual", desc:"The full history of instant noodles — design your own personalised Cup Noodles.", tags:["Unusual"], url:"https://www.instantramen-museum.jp" },
+    { name:"Dog Collar Museum", city:"Leeds Castle", type:"Unusual", desc:"500 years of dog collar history — the world's only collection of its kind.", tags:["Unusual","History"], url:"https://www.leeds-castle.com" },
+    { name:"Mustard Museum", city:"Middleton", type:"Unusual", desc:"Over 6,000 mustards from all 50 US states and more than 70 countries.", tags:["Unusual"], url:"https://www.mustardmuseum.com" },
+    { name:"Museum of Miniature Books", city:"Baku", type:"Unusual", desc:"Over 6,500 tiny books from 64 countries — some smaller than a fingernail.", tags:["Unusual"], url:"https://www.nadir-divan.az" },
+    { name:"Paris Sewer Museum", city:"Paris", type:"Unusual", desc:"Walk through the underground sewers of Paris and discover their hidden history.", tags:["Unusual","History"], url:"https://www.paris.fr/equipements/musee-des-egouts-de-paris-2528" },
+    { name:"Museo de las Momias", city:"Guanajuato", type:"Unusual", desc:"Over 100 naturally mummified bodies displayed in a haunting subterranean gallery.", tags:["Unusual","History"], url:"https://www.momiasdeguanajuato.gob.mx" },
+    { name:"Museum of Vampire Art", city:"Rouen", type:"Unusual", desc:"The world's only museum entirely dedicated to vampire mythology and imagery.", tags:["Unusual","Art"], url:"https://www.museumofvampireart.com" },
+    { name:"Cancun Underwater Museum", city:"Cancún", type:"Unusual", desc:"Over 500 submerged sculptures forming an artificial reef you explore by diving.", tags:["Unusual","Art"], url:"https://musacancun.mx" },
+];
+
+// ===================== APP STATE =====================
+let currentFilter = 'all';
+let currentView = 'grid';
+
+function setFilter(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    searchMuseums();
+}
+
+function setView(view, btn) {
+    currentView = view;
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('resultsGrid').classList.toggle('list-view', view === 'list');
+}
+
+function searchMuseums() {
+    const input = document.getElementById('citySearch').value.toLowerCase().trim();
+    const grid = document.getElementById('resultsGrid');
+    const sectionTitle = document.getElementById('sectionTitle');
+    const statsText = document.getElementById('statsText');
+    grid.innerHTML = '';
+
+    let filtered = museums;
+    if (input) {
+        filtered = filtered.filter(m =>
+            m.city.toLowerCase().includes(input) ||
+            m.name.toLowerCase().includes(input) ||
+            m.type.toLowerCase().includes(input)
+        );
+    }
+    if (currentFilter !== 'all') {
+        filtered = filtered.filter(m => m.tags.includes(currentFilter));
+    }
+
+    if (input) sectionTitle.textContent = `${t('resultsFor')} « ${input} »`;
+    else if (currentFilter !== 'all') sectionTitle.textContent = t('filter' + currentFilter) || currentFilter;
+    else sectionTitle.textContent = t('allMuseums');
+
+    const count = filtered.length;
+    statsText.innerHTML = `<strong>${count}</strong> ${count > 1 ? t('foundPlural') : t('found')}`;
+
+    if (filtered.length === 0) {
+        grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🏛</div><div class="empty-title">${t('noResult')}</div><p class="empty-sub">${t('noResultSub')}</p></div>`;
+        return;
+    }
+
+    filtered.forEach((m, i) => {
+        const isUnusual = m.tags.includes('Unusual');
+        const card = document.createElement('div');
+        card.className = 'museum-card';
+        card.style.animationDelay = `${i * 0.025}s`;
+        card.innerHTML = `
+            <div class="card-color-band" style="${isUnusual ? 'background:linear-gradient(90deg,#2d1b4e,#c4a8e8)' : ''}"></div>
+            <div class="card-body">
+                <h3 class="museum-name">${m.name}</h3>
+                <p class="card-desc">${m.desc}</p>
+                <div class="card-tags">
+                    <span class="tag tag-city">${m.city}</span>
+                    <span class="tag ${isUnusual ? 'tag-unusual' : 'tag-type'}">${m.type}</span>
+                </div>
+                <div class="card-link-hint">${t('seeDetails')}</div>
+            </div>`;
+        card.addEventListener('click', () => openMuseum(m));
+        grid.appendChild(card);
+    });
+}
+
+// ===================== DETAIL PANEL =====================
+function openMuseum(m) {
+    document.getElementById('panelCity').textContent = m.city;
+    document.getElementById('panelTitle').textContent = m.name;
+    document.getElementById('panelType').textContent = m.type;
+    document.getElementById('panelBody').innerHTML = `
+        <div class="panel-loading">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">${t('loadingText')}</div>
+        </div>`;
+    document.getElementById('detailPanel').style.display = 'flex';
+    document.getElementById('panelOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    fetchMuseumDetails(m);
+}
+
+function closePanel() {
+    document.getElementById('detailPanel').style.display = 'none';
+    document.getElementById('panelOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+async function fetchMuseumDetails(m) {
+    const prompt = t('aiPrompt')
+        .replace('{name}', m.name)
+        .replace('{city}', m.city)
+        .replace('{type}', m.type);
+    try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: 1000,
+                messages: [{ role: 'user', content: prompt }]
+            })
+        });
+        const data = await res.json();
+        const text = data.content.find(b => b.type === 'text')?.text || '';
+        const json = JSON.parse(text.replace(/```json|```/g, '').trim());
+        renderPanel(json, m);
+    } catch(e) {
+        document.getElementById('panelBody').innerHTML = `
+            <div style="text-align:center;padding:40px;color:var(--text-muted)">
+                <div style="font-size:2rem;margin-bottom:12px">🏛</div>
+                <p>${t('errorText')}</p>
+                ${m.url ? `<a href="${m.url}" target="_blank" rel="noopener" class="panel-cta" style="margin-top:20px">${t('visitSite')}</a>` : ''}
+            </div>`;
+    }
+}
+
+function renderPanel(data, m) {
+    const tipIcons = ['💡','🕐','🎫'];
+    const shareUrl = encodeURIComponent(window.location.href);
+    const shareText = encodeURIComponent(`${t('subtitle')} : ${m.name} (${m.city})`);
+
+    document.getElementById('panelBody').innerHTML = `
+        <div class="panel-section">
+            <p class="panel-intro">${data.intro}</p>
+        </div>
+
+        <div class="panel-section">
+            <div class="panel-section-title">${t('panelMasterpieces')}</div>
+            <div class="masterpiece-list">
+                ${data.masterpieces.map((mp, i) => `
+                    <div class="masterpiece-item">
+                        <div class="masterpiece-num">0${i+1}</div>
+                        <div>
+                            <div class="masterpiece-name">${mp.name}</div>
+                            <div class="masterpiece-detail">${mp.detail}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+
+        <div class="info-grid panel-section">
+            <div class="info-item">
+                <div class="info-label">${t('hoursLabel')}</div>
+                <div class="info-value">${data.infos.horaires}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">${t('closedLabel')}</div>
+                <div class="info-value">${data.infos.fermeture}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">${t('priceLabel')}</div>
+                <div class="info-value">${data.infos.prix}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">${t('accessLabel')}</div>
+                <div class="info-value">${data.infos.acces}</div>
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <div class="panel-section-title">${t('panelTips')}</div>
+            <div class="tips-list">
+                ${data.tips.map((tip, i) => `
+                    <div class="tip-item">
+                        <span class="tip-icon">${tipIcons[i] || '✓'}</span>
+                        <span>${tip}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <div class="panel-section-title">${t('shareTitle')}</div>
+            <div class="panel-share">
+                <a class="share-btn" href="https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}" target="_blank">
+                    <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    X
+                </a>
+                <a class="share-btn" href="https://www.facebook.com/sharer/sharer.php?u=${shareUrl}" target="_blank">
+                    <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    Facebook
+                </a>
+                <a class="share-btn" href="https://wa.me/?text=${shareText}%20${shareUrl}" target="_blank">
+                    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.27 9.27 0 01-4.723-1.285l-.338-.201-3.511.92 1.044-3.327-.22-.351A9.23 9.23 0 014.162 4.48 9.263 9.263 0 0117.18 20.457a9.18 9.18 0 01-5.129 1.328z"/></svg>
+                    WhatsApp
+                </a>
+            </div>
+        </div>
+        ${m.url ? `<a href="${m.url}" target="_blank" rel="noopener" class="panel-cta">${t('visitSite')}</a>` : ''}
+    `;
+}
+// ===================== INIT =====================
+document.getElementById('citySearch').addEventListener('input', searchMuseums);
+applyTranslations();
+searchMuseums();
+</script>
+</body>
+</html>
