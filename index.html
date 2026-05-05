@@ -11,6 +11,14 @@
 </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'none';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    
     <title>VisiMuseum — Find Your Next Museum</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -675,29 +683,6 @@
 
         .panel-body { padding: 32px; flex: 1; }
 
-        .panel-loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 80px 20px;
-            gap: 16px;
-        }
-        .loading-spinner {
-            width: 36px; height: 36px;
-            border: 2px solid var(--cream-dark);
-            border-top-color: var(--gold);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loading-text {
-            font-family: 'Cormorant Garamond', serif;
-            font-style: italic;
-            font-size: 1rem;
-            color: var(--text-muted);
-        }
-
         .panel-section { margin-bottom: 32px; }
         .panel-section-title {
             font-size: 0.68rem;
@@ -949,7 +934,6 @@ const i18n = {
         found: "museum found", foundPlural: "museums found",
         noResult: "No museum found", noResultSub: "Try a different city or search term.",
         seeDetails: "See details →",
-        loadingText: "Loading information...",
         errorText: "Unable to load details. Visit the official website for more information.",
         visitSite: "Visit official website →",
         footerRights: "All rights reserved",
@@ -970,7 +954,6 @@ const i18n = {
         found: "musée trouvé", foundPlural: "musées trouvés",
         noResult: "Aucun musée trouvé", noResultSub: "Essayez une autre ville ou un autre terme.",
         seeDetails: "Voir les détails →",
-        loadingText: "Chargement des informations...",
         errorText: "Impossible de charger les détails. Visitez le site officiel.",
         visitSite: "Visiter le site officiel →",
         footerRights: "Tous droits réservés",
@@ -991,7 +974,6 @@ const i18n = {
         found: "museo encontrado", foundPlural: "museos encontrados",
         noResult: "Ningún museo encontrado", noResultSub: "Prueba con otra ciudad o término de búsqueda.",
         seeDetails: "Ver detalles →",
-        loadingText: "Cargando información...",
         errorText: "No se pudieron cargar los detalles. Visita el sitio oficial.",
         visitSite: "Visitar sitio oficial →",
         footerRights: "Todos los derechos reservados",
@@ -1006,10 +988,43 @@ const i18n = {
 
 let lang = 'en';
 let searchTimeout = null;
-let abortController = null;
 let currentFilter = 'all';
 let currentView = 'grid';
 let currentCountry = '';
+
+// ===================== SECURITY: Rate Limiting =====================
+const THROTTLE_DELAY = 1000;
+let lastFetchTime = 0;
+
+function sanitizeInput(text) {
+    if (typeof text !== 'string') return '';
+    const div = document.createElement('div');
+    div.textContent = text.substring(0, 200);
+    return div.innerHTML;
+}
+
+function validateMuseum(museum) {
+    if (!museum || typeof museum !== 'object') {
+        throw new Error('Invalid museum object');
+    }
+    
+    const { name, city, country, type } = museum;
+    
+    if (!name || name.length > 100) {
+        throw new Error('Invalid museum name');
+    }
+    if (!city || city.length > 100) {
+        throw new Error('Invalid city');
+    }
+    if (!country || country.length > 100) {
+        throw new Error('Invalid country');
+    }
+    if (!type || type.length > 100) {
+        throw new Error('Invalid type');
+    }
+    
+    return { name, city, country, type };
+}
 
 function t(key) {
     return i18n[lang]?.[key] || '';
@@ -1031,14 +1046,13 @@ function applyTranslations() {
     const cityInput = document.getElementById('citySearch');
     if (cityInput) cityInput.placeholder = t('searchPlaceholder');
     
-    // Update country select label
     const countrySelect = document.getElementById('countrySelect');
     if (countrySelect) {
         countrySelect.options[0].text = t('allCountries');
     }
 }
 
-// ===================== MUSEUMS DATA WITH COUNTRY =====================
+// ===================== MUSEUMS DATA =====================
 const museums = [
     // FRANCE
     { name: "MUCEM", city: "Marseille", country: "France", type: "Culture", desc: "A stunning seafront museum dedicated to Mediterranean civilizations and culture.", tags: ["History", "Art"], url: "https://www.mucem.org", admission: "paid" },
@@ -1054,188 +1068,200 @@ const museums = [
     { name: "Musée Marmottan Monet", city: "Paris", country: "France", type: "Impressionism", desc: "The world's largest Monet collection — over 300 works in a 19th-century hunting lodge.", tags: ["Art"], url: "https://www.marmottan.fr", admission: "paid" },
     { name: "Musée de Cluny", city: "Paris", country: "France", type: "Medieval Art", desc: "The Lady and the Unicorn tapestries and Roman baths beneath medieval Paris.", tags: ["Art", "History"], url: "https://www.musee-moyenage.fr", admission: "paid" },
     { name: "Palais de Tokyo", city: "Paris", country: "France", type: "Contemporary Art", desc: "The most dynamic contemporary art space in Europe, open until midnight.", tags: ["Art", "Modern"], url: "https://www.palaisdetokyo.com", admission: "paid" },
-    { name: "Bourse de Commerce", city: "Paris", country: "France", type: "Contemporary Art", desc: "The Pinault Collection housed in a restored circular grain exchange with a concrete cylinder by Tadao Ando.", tags: ["Art", "Modern"], url: "https://www.pinaultcollection.com", admission: "paid" },
-    { name: "La Piscine", city: "Roubaix", country: "France", type: "Art", desc: "An exceptional museum of art and industry located in a stunning former Art Deco swimming pool.", tags: ["Art"], url: "https://www.roubaix-lapiscine.com", admission: "paid" },
-    { name: "Louvre-Lens", city: "Lens", country: "France", type: "Art & History", desc: "A stunning satellite of the Louvre displaying masterpieces in a former mining region.", tags: ["Art", "History"], url: "https://www.louvrelens.fr", admission: "paid" },
-    { name: "Musée d'Art Moderne de Lille", city: "Lille", country: "France", type: "Modern Art", desc: "One of France's largest modern art collections with Picasso, Matisse and Calder.", tags: ["Art", "Modern"], url: "https://www.lamlm.fr", admission: "paid" },
-    { name: "Musée de la Magie", city: "Paris", country: "France", type: "Unusual", desc: "Hidden in the vaults of the Marais, a mysterious collection of automata and illusions.", tags: ["Unusual", "History"], url: "https://www.museedelamagie.org", admission: "paid" },
-    { name: "Paris Sewer Museum", city: "Paris", country: "France", type: "Unusual", desc: "Walk through the underground sewers of Paris and discover their hidden history.", tags: ["Unusual", "History"], url: "https://www.paris.fr/equipements/musee-des-egouts-de-paris-2528", admission: "paid" },
+    { name: "Bourse de Commerce", city: "Paris", country: "France", type: "Contemporary Art", desc: "The Pinault Collection housed in a restored circular grain exchange.", tags: ["Art", "Modern"], url: "https://www.pinaultcollection.com", admission: "paid" },
+    { name: "La Piscine", city: "Roubaix", country: "France", type: "Art", desc: "An exceptional museum of art and industry in a stunning former Art Deco swimming pool.", tags: ["Art"], url: "https://www.roubaix-lapiscine.com", admission: "paid" },
+    { name: "Louvre-Lens", city: "Lens", country: "France", type: "Art & History", desc: "A satellite of the Louvre displaying masterpieces in a former mining region.", tags: ["Art", "History"], url: "https://www.louvrelens.fr", admission: "paid" },
+    { name: "Musée d'Art Moderne de Lille", city: "Lille", country: "France", type: "Modern Art", desc: "One of France's largest modern art collections with Picasso and Matisse.", tags: ["Art", "Modern"], url: "https://www.lamlm.fr", admission: "paid" },
+    { name: "Musée de la Magie", city: "Paris", country: "France", type: "Unusual", desc: "Hidden in the Marais, a mysterious collection of automata and illusions.", tags: ["Unusual", "History"], url: "https://www.museedelamagie.org", admission: "paid" },
+    { name: "Paris Sewer Museum", city: "Paris", country: "France", type: "Unusual", desc: "Walk through the underground sewers of Paris and discover their history.", tags: ["Unusual", "History"], url: "https://www.paris.fr/equipements/musee-des-egouts-de-paris-2528", admission: "paid" },
 
     // MONACO
-    { name: "Musée Océanographique", city: "Monaco", country: "Monaco", type: "Science & Nature", desc: "Built into a cliffside, this 'Temple of the Sea' houses giant aquariums and marine curiosities.", tags: ["Science", "Nature"], url: "https://musee.oceano.org", admission: "paid" },
+    { name: "Musée Océanographique", city: "Monaco", country: "Monaco", type: "Science & Nature", desc: "Built into a cliffside, this 'Temple of the Sea' houses giant aquariums.", tags: ["Science", "Nature"], url: "https://musee.oceano.org", admission: "paid" },
 
     // UNITED KINGDOM
-    { name: "The Design Museum", city: "London", country: "United Kingdom", type: "Design", desc: "The world's leading museum devoted to contemporary design in every form.", tags: ["Art", "Modern"], url: "https://designmuseum.org", admission: "paid" },
-    { name: "British Museum", city: "London", country: "United Kingdom", type: "World History", desc: "The Rosetta Stone and Elgin Marbles among 8 million objects spanning human civilisation.", tags: ["History"], url: "https://www.britishmuseum.org", admission: "free" },
+    { name: "The Design Museum", city: "London", country: "United Kingdom", type: "Design", desc: "The world's leading museum devoted to contemporary design.", tags: ["Art", "Modern"], url: "https://designmuseum.org", admission: "paid" },
+    { name: "British Museum", city: "London", country: "United Kingdom", type: "World History", desc: "The Rosetta Stone and Elgin Marbles spanning human civilisation.", tags: ["History"], url: "https://www.britishmuseum.org", admission: "free" },
     { name: "Tate Modern", city: "London", country: "United Kingdom", type: "Contemporary Art", desc: "Housed in a former power station on the banks of the Thames.", tags: ["Art", "Modern"], url: "https://www.tate.org.uk/visit/tate-modern", admission: "free" },
     { name: "Victoria and Albert Museum", city: "London", country: "United Kingdom", type: "Decorative Arts", desc: "The world's largest museum dedicated to applied arts and design.", tags: ["Art"], url: "https://www.vam.ac.uk", admission: "free" },
-    { name: "Natural History Museum", city: "London", country: "United Kingdom", type: "Natural Sciences", desc: "A blue whale skeleton and Darwin's meteorite collection in a cathedral-like building.", tags: ["Science", "Nature"], url: "https://www.nhm.ac.uk", admission: "free" },
-    { name: "Science Museum", city: "London", country: "United Kingdom", type: "Science", desc: "From Stephenson's Rocket to the Apollo 10 capsule — the history of human ingenuity.", tags: ["Science"], url: "https://www.sciencemuseum.org.uk", admission: "free" },
+    { name: "Natural History Museum", city: "London", country: "United Kingdom", type: "Natural Sciences", desc: "A blue whale skeleton and Darwin's collections in a cathedral-like building.", tags: ["Science", "Nature"], url: "https://www.nhm.ac.uk", admission: "free" },
+    { name: "Science Museum", city: "London", country: "United Kingdom", type: "Science", desc: "From Stephenson's Rocket to the Apollo 10 capsule — the history of ingenuity.", tags: ["Science"], url: "https://www.sciencemuseum.org.uk", admission: "free" },
     { name: "National Gallery", city: "London", country: "United Kingdom", type: "Painting", desc: "Van Eyck to Cézanne — 2,300 paintings spanning 700 years of Western art.", tags: ["Art", "History"], url: "https://www.nationalgallery.org.uk", admission: "free" },
-    { name: "Museum of Witchcraft and Magic", city: "Boscastle", country: "United Kingdom", type: "Unusual", desc: "The world's largest collection of witchcraft artefacts in a tiny Cornish fishing village.", tags: ["Unusual", "History"], url: "https://museumofwitchcraftandmagic.co.uk", admission: "paid" },
-    { name: "Dog Collar Museum", city: "Leeds Castle", country: "United Kingdom", type: "Unusual", desc: "500 years of dog collar history — the world's only collection of its kind.", tags: ["Unusual", "History"], url: "https://www.leeds-castle.com", admission: "paid" },
+    { name: "Museum of Witchcraft and Magic", city: "Boscastle", country: "United Kingdom", type: "Unusual", desc: "The world's largest witchcraft artefact collection in a Cornish village.", tags: ["Unusual", "History"], url: "https://museumofwitchcraftandmagic.co.uk", admission: "paid" },
+    { name: "Dog Collar Museum", city: "Leeds Castle", country: "United Kingdom", type: "Unusual", desc: "500 years of dog collar history — the world's only collection.", tags: ["Unusual", "History"], url: "https://www.leeds-castle.com", admission: "paid" },
 
     // USA
-    { name: "The Getty Center", city: "Los Angeles", country: "United States", type: "Art", desc: "Spectacular architecture and gardens overlooking LA, with European and American art.", tags: ["Art", "History"], url: "https://www.getty.edu", admission: "free" },
-    { name: "Exploratorium", city: "San Francisco", country: "United States", type: "Science", desc: "A public learning laboratory exploring the world through science, art, and human perception.", tags: ["Science"], url: "https://www.exploratorium.edu", admission: "paid" },
+    { name: "The Getty Center", city: "Los Angeles", country: "United States", type: "Art", desc: "Spectacular architecture and gardens with European and American art.", tags: ["Art", "History"], url: "https://www.getty.edu", admission: "free" },
+    { name: "Exploratorium", city: "San Francisco", country: "United States", type: "Science", desc: "A learning laboratory exploring the world through science and art.", tags: ["Science"], url: "https://www.exploratorium.edu", admission: "paid" },
     { name: "MoMA", city: "New York", country: "United States", type: "Modern Art", desc: "The world reference for modern art with Picasso, Warhol and Dalí.", tags: ["Art", "Modern"], url: "https://www.moma.org", admission: "paid" },
-    { name: "Metropolitan Museum", city: "New York", country: "United States", type: "Universal Art", desc: "5,000 years of art history across all civilisations in a single extraordinary building.", tags: ["Art", "History"], url: "https://www.metmuseum.org", admission: "paid" },
+    { name: "Metropolitan Museum", city: "New York", country: "United States", type: "Universal Art", desc: "5,000 years of art history across all civilisations.", tags: ["Art", "History"], url: "https://www.metmuseum.org", admission: "paid" },
     { name: "American Museum of Natural History", city: "New York", country: "United States", type: "Natural Sciences", desc: "Dinosaurs, a full-scale blue whale and cultures from across the world.", tags: ["Science", "Nature"], url: "https://www.amnh.org", admission: "paid" },
-    { name: "Guggenheim New York", city: "New York", country: "United States", type: "Modern Art", desc: "Frank Lloyd Wright's spiralling architecture housing a landmark modern art collection.", tags: ["Art", "Modern"], url: "https://www.guggenheim.org", admission: "paid" },
-    { name: "Brooklyn Museum", city: "New York", country: "United States", type: "Universal Art", desc: "One of the largest art museums in the US with an exceptional ancient Egyptian collection.", tags: ["Art", "History"], url: "https://www.brooklynmuseum.org", admission: "paid" },
-    { name: "Whitney Museum", city: "New York", country: "United States", type: "American Art", desc: "The definitive collection of 20th and 21st century American art on the High Line.", tags: ["Art", "Modern"], url: "https://whitney.org", admission: "paid" },
+    { name: "Guggenheim New York", city: "New York", country: "United States", type: "Modern Art", desc: "Frank Lloyd Wright's spiralling architecture with modern art.", tags: ["Art", "Modern"], url: "https://www.guggenheim.org", admission: "paid" },
+    { name: "Brooklyn Museum", city: "New York", country: "United States", type: "Universal Art", desc: "One of the largest art museums with an exceptional Egyptian collection.", tags: ["Art", "History"], url: "https://www.brooklynmuseum.org", admission: "paid" },
+    { name: "Whitney Museum", city: "New York", country: "United States", type: "American Art", desc: "Definitive collection of 20th and 21st century American art.", tags: ["Art", "Modern"], url: "https://whitney.org", admission: "paid" },
     { name: "Smithsonian", city: "Washington DC", country: "United States", type: "Science & History", desc: "The world's largest museum complex — 19 museums all free to enter.", tags: ["Science", "History"], url: "https://www.si.edu", admission: "free" },
-    { name: "National Gallery of Art", city: "Washington DC", country: "United States", type: "Art", desc: "From Leonardo to Rothko — one of the world's great art collections, free admission.", tags: ["Art", "History"], url: "https://www.nga.gov", admission: "free" },
-    { name: "International Spy Museum", city: "Washington DC", country: "United States", type: "Unusual", desc: "The world's largest collection of spy gadgets from real Cold War espionage to James Bond.", tags: ["Unusual", "History"], url: "https://www.spymuseum.org", admission: "paid" },
+    { name: "National Gallery of Art", city: "Washington DC", country: "United States", type: "Art", desc: "From Leonardo to Rothko — one of the world's great art collections.", tags: ["Art", "History"], url: "https://www.nga.gov", admission: "free" },
+    { name: "International Spy Museum", city: "Washington DC", country: "United States", type: "Unusual", desc: "The world's largest spy gadget collection from Cold War espionage.", tags: ["Unusual", "History"], url: "https://www.spymuseum.org", admission: "paid" },
     { name: "Art Institute of Chicago", city: "Chicago", country: "United States", type: "Art", desc: "Seurat's Sunday on La Grande Jatte and Grant Wood's American Gothic.", tags: ["Art", "History"], url: "https://www.artic.edu", admission: "paid" },
-    { name: "Neon Museum", city: "Las Vegas", country: "United States", type: "Unusual", desc: "The 'Neon Boneyard' where iconic signs of vintage Las Vegas go to glow forever.", tags: ["Unusual", "Art"], url: "https://www.neonmuseum.org", admission: "paid" },
-    { name: "Museum of Bad Art", city: "Boston", country: "United States", type: "Unusual", desc: "Dedicated to art too bad to be ignored — celebrating spectacular artistic failure.", tags: ["Unusual", "Art"], url: "https://museumofbadart.org", admission: "paid" },
-    { name: "Mütter Museum", city: "Philadelphia", country: "United States", type: "Unusual", desc: "Medical oddities, anatomical specimens and pathological collections in a Victorian setting.", tags: ["Unusual", "Science"], url: "https://muttermuseum.org", admission: "paid" },
-    { name: "Cryptozoology Museum", city: "Portland", country: "United States", type: "Unusual", desc: "Dedicated to Bigfoot, the Loch Ness Monster and other creatures of legend.", tags: ["Unusual", "Science"], url: "https://www.cryptozoologymuseum.com", admission: "paid" },
-    { name: "Museum of Failure", city: "Helsingborg", country: "Sweden", type: "Unusual", desc: "Products that bombed spectacularly — from Crystal Pepsi to the Ford Edsel.", tags: ["Unusual"], url: "https://www.museumoffailure.com", admission: "paid" },
-    { name: "International UFO Museum", city: "Roswell", country: "United States", type: "Unusual", desc: "Dedicated to the 1947 Roswell incident and extraterrestrial phenomena worldwide.", tags: ["Unusual"], url: "https://www.roswellufomuseum.com", admission: "paid" },
-    { name: "Museum of Jurassic Technology", city: "Los Angeles", country: "United States", type: "Unusual", desc: "A deliberately confusing museum blurring fact and fiction — nobody knows what's real.", tags: ["Unusual"], url: "https://www.mjt.org", admission: "paid" },
-    { name: "Salt and Pepper Shaker Museum", city: "Gatlinburg", country: "United States", type: "Unusual", desc: "Over 20,000 salt and pepper shaker sets from around the world and across the centuries.", tags: ["Unusual"], url: "https://thesaltandpeppershakermuseum.com", admission: "paid" },
-    { name: "Mustard Museum", city: "Middleton", country: "United States", type: "Unusual", desc: "Over 6,000 mustards from all 50 US states and more than 70 countries.", tags: ["Unusual"], url: "https://www.mustardmuseum.com", admission: "paid" },
+    { name: "Neon Museum", city: "Las Vegas", country: "United States", type: "Unusual", desc: "The 'Neon Boneyard' where iconic vintage Vegas signs glow forever.", tags: ["Unusual", "Art"], url: "https://www.neonmuseum.org", admission: "paid" },
+    { name: "Museum of Bad Art", city: "Boston", country: "United States", type: "Unusual", desc: "Dedicated to art too bad to be ignored — celebrating artistic failure.", tags: ["Unusual", "Art"], url: "https://museumofbadart.org", admission: "paid" },
+    { name: "Mütter Museum", city: "Philadelphia", country: "United States", type: "Unusual", desc: "Medical oddities and anatomical specimens in a Victorian setting.", tags: ["Unusual", "Science"], url: "https://muttermuseum.org", admission: "paid" },
+    { name: "Cryptozoology Museum", city: "Portland", country: "United States", type: "Unusual", desc: "Dedicated to Bigfoot, Loch Ness Monster and legendary creatures.", tags: ["Unusual", "Science"], url: "https://www.cryptozoologymuseum.com", admission: "paid" },
+    { name: "International UFO Museum", city: "Roswell", country: "United States", type: "Unusual", desc: "Dedicated to the 1947 Roswell incident and UFO phenomena.", tags: ["Unusual"], url: "https://www.roswellufomuseum.com", admission: "paid" },
+    { name: "Museum of Jurassic Technology", city: "Los Angeles", country: "United States", type: "Unusual", desc: "Deliberately blurs fact and fiction — nobody knows what's real.", tags: ["Unusual"], url: "https://www.mjt.org", admission: "paid" },
+    { name: "Salt and Pepper Shaker Museum", city: "Gatlinburg", country: "United States", type: "Unusual", desc: "Over 20,000 salt and pepper shaker sets from around the world.", tags: ["Unusual"], url: "https://thesaltandpeppershakermuseum.com", admission: "paid" },
+    { name: "Mustard Museum", city: "Middleton", country: "United States", type: "Unusual", desc: "Over 6,000 mustards from all 50 US states and 70+ countries.", tags: ["Unusual"], url: "https://www.mustardmuseum.com", admission: "paid" },
 
     // CANADA
-    { name: "ROM", city: "Toronto", country: "Canada", type: "Universal Art", desc: "Canada's largest museum of world culture and natural history with its iconic 'Crystal' wing.", tags: ["Art", "Nature"], url: "https://www.rom.on.ca", admission: "paid" },
-    { name: "Musée de l'Histoire du Canada", city: "Ottawa", country: "Canada", type: "History", desc: "Discover the events, people and objects that have shaped the country's identity.", tags: ["History"], url: "https://www.historymuseum.ca", admission: "free" },
+    { name: "ROM", city: "Toronto", country: "Canada", type: "Universal Art", desc: "Canada's largest museum with iconic 'Crystal' wing.", tags: ["Art", "Nature"], url: "https://www.rom.on.ca", admission: "paid" },
+    { name: "Musée de l'Histoire du Canada", city: "Ottawa", country: "Canada", type: "History", desc: "Events and objects that shaped Canada's identity.", tags: ["History"], url: "https://www.historymuseum.ca", admission: "free" },
 
     // ITALY
-    { name: "Galleria dell'Accademia", city: "Florence", country: "Italy", type: "Renaissance", desc: "The home of Michelangelo's David and other masterpieces of Florentine sculpture.", tags: ["Art", "History"], url: "https://www.galleriaaccademiafirenze.it", admission: "paid" },
-    { name: "Vatican Museums", city: "Rome", country: "Italy", type: "Religious Art", desc: "The Sistine Chapel and pontifical collections gathered over 2,000 years.", tags: ["Art", "History"], url: "https://www.museivaticani.va", admission: "paid" },
-    { name: "Museo Nazionale Romano", city: "Rome", country: "Italy", type: "Archaeology", desc: "The finest sculptures and mosaics of Roman antiquity across four sites.", tags: ["History"], url: "https://www.museonazionaleromano.beniculturali.it", admission: "paid" },
-    { name: "Uffizi Gallery", city: "Florence", country: "Italy", type: "Renaissance", desc: "Botticelli's Birth of Venus and masterpieces by Leonardo and Michelangelo.", tags: ["Art", "History"], url: "https://www.uffizi.it", admission: "paid" },
-    { name: "Palazzo Pitti", city: "Florence", country: "Italy", type: "Renaissance", desc: "A Renaissance palace with seven museums and the stunning Boboli Gardens.", tags: ["Art", "History"], url: "https://www.uffizi.it/en/pitti-palace", admission: "paid" },
-    { name: "Guggenheim Venice", city: "Venice", country: "Italy", type: "Modern Art", desc: "Personal collection of Peggy Guggenheim in her unfinished 18th-century palazzo on the Grand Canal.", tags: ["Art", "Modern"], url: "https://www.guggenheim-venice.it", admission: "paid" },
+    { name: "Galleria dell'Accademia", city: "Florence", country: "Italy", type: "Renaissance", desc: "Home of Michelangelo's David and Florentine sculpture masterpieces.", tags: ["Art", "History"], url: "https://www.galleriaaccademiafirenze.it", admission: "paid" },
+    { name: "Vatican Museums", city: "Rome", country: "Italy", type: "Religious Art", desc: "The Sistine Chapel and pontifical collections over 2,000 years.", tags: ["Art", "History"], url: "https://www.museivaticani.va", admission: "paid" },
+    { name: "Museo Nazionale Romano", city: "Rome", country: "Italy", type: "Archaeology", desc: "Finest sculptures and mosaics of Roman antiquity.", tags: ["History"], url: "https://www.museonazionaleromano.beniculturali.it", admission: "paid" },
+    { name: "Uffizi Gallery", city: "Florence", country: "Italy", type: "Renaissance", desc: "Botticelli's Birth of Venus and Leonardo and Michelangelo masterpieces.", tags: ["Art", "History"], url: "https://www.uffizi.it", admission: "paid" },
+    { name: "Palazzo Pitti", city: "Florence", country: "Italy", type: "Renaissance", desc: "Renaissance palace with seven museums and Boboli Gardens.", tags: ["Art", "History"], url: "https://www.uffizi.it/en/pitti-palace", admission: "paid" },
+    { name: "Guggenheim Venice", city: "Venice", country: "Italy", type: "Modern Art", desc: "Peggy Guggenheim's collection in her 18th-century palazzo.", tags: ["Art", "Modern"], url: "https://www.guggenheim-venice.it", admission: "paid" },
 
     // SPAIN
-    { name: "Musée du Prado", city: "Madrid", country: "Spain", type: "Painting", desc: "Velázquez, Goya and El Greco in one of Europe's greatest painting collections.", tags: ["Art", "History"], url: "https://www.museodelprado.es", admission: "paid" },
-    { name: "Museo Reina Sofía", city: "Madrid", country: "Spain", type: "Contemporary Art", desc: "Picasso's Guernica and masterpieces of Spanish surrealism.", tags: ["Art", "Modern"], url: "https://www.museoreinasofia.es", admission: "paid" },
-    { name: "Thyssen-Bornemisza", city: "Madrid", country: "Spain", type: "Universal Art", desc: "One of the world's finest private collections spanning 800 years of Western painting.", tags: ["Art", "History"], url: "https://www.museothyssen.org", admission: "paid" },
-    { name: "Museo Guggenheim Bilbao", city: "Bilbao", country: "Spain", type: "Contemporary Art", desc: "Frank Gehry's titanium masterpiece housing world-class contemporary art.", tags: ["Art", "Modern"], url: "https://www.guggenheim-bilbao.eus", admission: "paid" },
+    { name: "Musée du Prado", city: "Madrid", country: "Spain", type: "Painting", desc: "Velázquez, Goya and El Greco in Europe's greatest collection.", tags: ["Art", "History"], url: "https://www.museodelprado.es", admission: "paid" },
+    { name: "Museo Reina Sofía", city: "Madrid", country: "Spain", type: "Contemporary Art", desc: "Picasso's Guernica and Spanish surrealism masterpieces.", tags: ["Art", "Modern"], url: "https://www.museoreinasofia.es", admission: "paid" },
+    { name: "Thyssen-Bornemisza", city: "Madrid", country: "Spain", type: "Universal Art", desc: "Fine private collection spanning 800 years of Western painting.", tags: ["Art", "History"], url: "https://www.museothyssen.org", admission: "paid" },
+    { name: "Museo Guggenheim Bilbao", city: "Bilbao", country: "Spain", type: "Contemporary Art", desc: "Frank Gehry's titanium masterpiece with world-class contemporary art.", tags: ["Art", "Modern"], url: "https://www.guggenheim-bilbao.eus", admission: "paid" },
 
     // NETHERLANDS
-    { name: "Rijksmuseum", city: "Amsterdam", country: "Netherlands", type: "Golden Age", desc: "Rembrandt and Vermeer in a palace dedicated to the Dutch Golden Age.", tags: ["Art", "History"], url: "https://www.rijksmuseum.nl", admission: "paid" },
-    { name: "Van Gogh Museum", city: "Amsterdam", country: "Netherlands", type: "Post-Impressionism", desc: "The largest collection of Van Gogh's works — 200 paintings, 500 drawings.", tags: ["Art"], url: "https://www.vangoghmuseum.nl", admission: "paid" },
-    { name: "Vrolik Museum", city: "Amsterdam", country: "Netherlands", type: "Unusual", desc: "A vast collection of pathological specimens, embryos, and anatomical oddities.", tags: ["Unusual", "Science"], url: "https://www.amsterdamumc.org/en/vrolik-museum.htm", admission: "free" },
+    { name: "Rijksmuseum", city: "Amsterdam", country: "Netherlands", type: "Golden Age", desc: "Rembrandt and Vermeer in a Dutch Golden Age palace.", tags: ["Art", "History"], url: "https://www.rijksmuseum.nl", admission: "paid" },
+    { name: "Van Gogh Museum", city: "Amsterdam", country: "Netherlands", type: "Post-Impressionism", desc: "Largest Van Gogh collection — 200 paintings, 500 drawings.", tags: ["Art"], url: "https://www.vangoghmuseum.nl", admission: "paid" },
+    { name: "Vrolik Museum", city: "Amsterdam", country: "Netherlands", type: "Unusual", desc: "Pathological specimens and anatomical oddities collection.", tags: ["Unusual", "Science"], url: "https://www.amsterdamumc.org/en/vrolik-museum.htm", admission: "free" },
 
     // GERMANY
-    { name: "Pergamon Museum", city: "Berlin", country: "Germany", type: "Archaeology", desc: "The reconstructed Gate of Babylon and Pergamon Altar at full scale.", tags: ["History"], url: "https://www.smb.museum", admission: "paid" },
-    { name: "Gemäldegalerie", city: "Berlin", country: "Germany", type: "Painting", desc: "One of the world's finest collections of European paintings from the 13th to 18th centuries.", tags: ["Art", "History"], url: "https://www.smb.museum/museen-einrichtungen/gemaeldegalerie", admission: "paid" },
-    { name: "Deutsches Spionagemuseum", city: "Berlin", country: "Germany", type: "Unusual", desc: "Experience the high-tech history of espionage in the world's capital of spies.", tags: ["Unusual", "History"], url: "https://www.deutsches-spionagemuseum.de", admission: "paid" },
-    { name: "Pinakothek der Moderne", city: "Munich", country: "Germany", type: "Modern Art", desc: "Four museums under one roof — art, design, architecture and works on paper.", tags: ["Art", "Modern"], url: "https://www.pinakothek.de", admission: "paid" },
+    { name: "Pergamon Museum", city: "Berlin", country: "Germany", type: "Archaeology", desc: "Reconstructed Gate of Babylon and Pergamon Altar at full scale.", tags: ["History"], url: "https://www.smb.museum", admission: "paid" },
+    { name: "Gemäldegalerie", city: "Berlin", country: "Germany", type: "Painting", desc: "Finest European paintings from 13th to 18th centuries.", tags: ["Art", "History"], url: "https://www.smb.museum/museen-einrichtungen/gemaeldegalerie", admission: "paid" },
+    { name: "Deutsches Spionagemuseum", city: "Berlin", country: "Germany", type: "Unusual", desc: "High-tech history of espionage in the world's spy capital.", tags: ["Unusual", "History"], url: "https://www.deutsches-spionagemuseum.de", admission: "paid" },
+    { name: "Pinakothek der Moderne", city: "Munich", country: "Germany", type: "Modern Art", desc: "Four museums under one roof — art, design and architecture.", tags: ["Art", "Modern"], url: "https://www.pinakothek.de", admission: "paid" },
 
     // AUSTRIA
-    { name: "Kunsthistorisches Museum", city: "Vienna", country: "Austria", type: "Universal Art", desc: "The Habsburg imperial collections in a stunning 19th-century palace.", tags: ["Art", "History"], url: "https://www.khm.at", admission: "paid" },
-    { name: "Belvedere", city: "Vienna", country: "Austria", type: "Art", desc: "Klimt's The Kiss displayed in a Baroque palace with a formal garden.", tags: ["Art", "History"], url: "https://www.belvedere.at", admission: "paid" },
+    { name: "Kunsthistorisches Museum", city: "Vienna", country: "Austria", type: "Universal Art", desc: "Habsburg imperial collections in a stunning palace.", tags: ["Art", "History"], url: "https://www.khm.at", admission: "paid" },
+    { name: "Belvedere", city: "Vienna", country: "Austria", type: "Art", desc: "Klimt's The Kiss in a Baroque palace with formal garden.", tags: ["Art", "History"], url: "https://www.belvedere.at", admission: "paid" },
 
     // DENMARK
-    { name: "Louisiana Museum", city: "Humlebæk", country: "Denmark", type: "Modern Art", desc: "A perfect synthesis of art, architecture, and landscape on the Danish coast.", tags: ["Art", "Modern"], url: "https://www.louisiana.dk", admission: "paid" },
+    { name: "Louisiana Museum", city: "Humlebæk", country: "Denmark", type: "Modern Art", desc: "Art, architecture and landscape synthesis on Danish coast.", tags: ["Art", "Modern"], url: "https://www.louisiana.dk", admission: "paid" },
 
     // SWEDEN
-    { name: "Nationalmuseum", city: "Stockholm", country: "Sweden", type: "Art & Design", desc: "Eight centuries of Swedish and European painting, sculpture and decorative arts.", tags: ["Art", "History"], url: "https://www.nationalmuseum.se", admission: "paid" },
+    { name: "Nationalmuseum", city: "Stockholm", country: "Sweden", type: "Art & Design", desc: "Eight centuries of Swedish and European art.", tags: ["Art", "History"], url: "https://www.nationalmuseum.se", admission: "paid" },
+    { name: "Museum of Failure", city: "Helsingborg", country: "Sweden", type: "Unusual", desc: "Products that bombed — from Crystal Pepsi to Ford Edsel.", tags: ["Unusual"], url: "https://www.museumoffailure.com", admission: "paid" },
 
     // BELGIUM
-    { name: "Musée Royal de l'Afrique Centrale", city: "Brussels", country: "Belgium", type: "Ethnography", desc: "Unique collections on Central Africa, wildlife and Belgian colonial history.", tags: ["History", "Nature"], url: "https://www.africamuseum.be", admission: "free" },
+    { name: "Musée Royal de l'Afrique Centrale", city: "Brussels", country: "Belgium", type: "Ethnography", desc: "Central African collections and Belgian colonial history.", tags: ["History", "Nature"], url: "https://www.africamuseum.be", admission: "free" },
 
     // GREECE
-    { name: "Acropolis Museum", city: "Athens", country: "Greece", type: "Archaeology", desc: "Parthenon sculptures displayed facing the Acropolis they once adorned.", tags: ["History"], url: "https://www.theacropolismuseum.gr", admission: "paid" },
+    { name: "Acropolis Museum", city: "Athens", country: "Greece", type: "Archaeology", desc: "Parthenon sculptures facing the Acropolis they adorned.", tags: ["History"], url: "https://www.theacropolismuseum.gr", admission: "paid" },
 
     // CZECHIA
-    { name: "Museum of Medieval Torture", city: "Prague", country: "Czechia", type: "Unusual", desc: "A chilling collection of authentic medieval torture devices across three floors.", tags: ["Unusual", "History"], url: "https://www.torturemuseum.net", admission: "paid" },
+    { name: "Museum of Medieval Torture", city: "Prague", country: "Czechia", type: "Unusual", desc: "Authentic medieval torture devices across three floors.", tags: ["Unusual", "History"], url: "https://www.torturemuseum.net", admission: "paid" },
 
     // SENEGAL
-    { name: "Museum of Black Civilisations", city: "Dakar", country: "Senegal", type: "Culture", desc: "A vast complex celebrating African contributions to world history and arts.", tags: ["History", "Art"], url: "https://mcn.sn", admission: "paid" },
+    { name: "Museum of Black Civilisations", city: "Dakar", country: "Senegal", type: "Culture", desc: "African contributions to world history and arts.", tags: ["History", "Art"], url: "https://mcn.sn", admission: "paid" },
 
     // PORTUGAL
-    { name: "Museu Nacional dos Coches", city: "Lisbon", country: "Portugal", type: "Unusual", desc: "One of the finest collections of historical royal carriages in the world.", tags: ["Unusual", "History"], url: "http://museudoscoches.gov.pt", admission: "free" },
+    { name: "Museu Nacional dos Coches", city: "Lisbon", country: "Portugal", type: "Unusual", desc: "Finest collection of historical royal carriages.", tags: ["Unusual", "History"], url: "http://museudoscoches.gov.pt", admission: "free" },
 
     // ICELAND
-    { name: "Perlan", city: "Reykjavik", country: "Iceland", type: "Unusual", desc: "A massive glass dome featuring a real indoor ice cave and a northern lights planetarium.", tags: ["Unusual", "Science"], url: "https://www.perlan.is", admission: "paid" },
-    { name: "Phallological Museum", city: "Reykjavik", country: "Iceland", type: "Unusual", desc: "The world's only museum dedicated to phallology — 215+ specimens from 93 species.", tags: ["Unusual", "Science"], url: "https://phallus.is", admission: "paid" },
+    { name: "Perlan", city: "Reykjavik", country: "Iceland", type: "Unusual", desc: "Glass dome with indoor ice cave and planetarium.", tags: ["Unusual", "Science"], url: "https://www.perlan.is", admission: "paid" },
+    { name: "Phallological Museum", city: "Reykjavik", country: "Iceland", type: "Unusual", desc: "World's only phallology museum — 215+ specimens.", tags: ["Unusual", "Science"], url: "https://phallus.is", admission: "paid" },
 
     // TURKEY
-    { name: "Topkapi Palace", city: "Istanbul", country: "Turkey", type: "Ottoman Art", desc: "The heart of the Ottoman Empire with jewels, arms and manuscript collections.", tags: ["Art", "History"], url: "https://millisaraylar.gov.tr/saraylar/topkapi", admission: "paid" },
+    { name: "Topkapi Palace", city: "Istanbul", country: "Turkey", type: "Ottoman Art", desc: "Ottoman Empire heart with jewels and manuscripts.", tags: ["Art", "History"], url: "https://millisaraylar.gov.tr/saraylar/topkapi", admission: "paid" },
 
     // ISRAEL
-    { name: "Israel Museum", city: "Jerusalem", country: "Israel", type: "Archaeology & Art", desc: "The Dead Sea Scrolls and one of the Middle East's largest art collections.", tags: ["Art", "History"], url: "https://www.imj.org.il", admission: "paid" },
+    { name: "Israel Museum", city: "Jerusalem", country: "Israel", type: "Archaeology & Art", desc: "Dead Sea Scrolls and Middle East art collections.", tags: ["Art", "History"], url: "https://www.imj.org.il", admission: "paid" },
 
     // EGYPT
-    { name: "Egyptian Museum", city: "Cairo", country: "Egypt", type: "Antiquities", desc: "The treasures of Tutankhamun and 120,000 pieces from ancient Egypt.", tags: ["History"], url: "https://egyptianmuseum.org", admission: "paid" },
-    { name: "Grand Egyptian Museum", city: "Giza", country: "Egypt", type: "Antiquities", desc: "The world's largest archaeological museum, built beside the Pyramids of Giza.", tags: ["History"], url: "https://gem.gov.eg", admission: "paid" },
-    { name: "Musée de Louxor", city: "Luxor", country: "Egypt", type: "Antiquities", desc: "A perfectly curated selection of artifacts from the ancient capital of Thebes.", tags: ["History"], url: "https://egymonuments.gov.eg", admission: "paid" },
+    { name: "Egyptian Museum", city: "Cairo", country: "Egypt", type: "Antiquities", desc: "Tutankhamun's treasures and 120,000 ancient pieces.", tags: ["History"], url: "https://egyptianmuseum.org", admission: "paid" },
+    { name: "Grand Egyptian Museum", city: "Giza", country: "Egypt", type: "Antiquities", desc: "World's largest archaeological museum by Pyramids.", tags: ["History"], url: "https://gem.gov.eg", admission: "paid" },
+    { name: "Musée de Louxor", city: "Luxor", country: "Egypt", type: "Antiquities", desc: "Curated artifacts from ancient Thebes capital.", tags: ["History"], url: "https://egymonuments.gov.eg", admission: "paid" },
 
     // RUSSIA
-    { name: "Hermitage", city: "St Petersburg", country: "Russia", type: "Art & History", desc: "3 million artworks in the former Winter Palace of the Russian tsars.", tags: ["Art", "History"], url: "https://www.hermitagemuseum.org", admission: "paid" },
+    { name: "Hermitage", city: "St Petersburg", country: "Russia", type: "Art & History", desc: "3 million artworks in the Winter Palace.", tags: ["Art", "History"], url: "https://www.hermitagemuseum.org", admission: "paid" },
 
     // HONG KONG
-    { name: "M+ Museum", city: "Hong Kong", country: "Hong Kong", type: "Visual Culture", desc: "Asia's first global museum of contemporary visual culture in the West Kowloon District.", tags: ["Art", "Modern"], url: "https://www.mplus.org.hk", admission: "paid" },
+    { name: "M+ Museum", city: "Hong Kong", country: "Hong Kong", type: "Visual Culture", desc: "Asia's first global contemporary visual culture museum.", tags: ["Art", "Modern"], url: "https://www.mplus.org.hk", admission: "paid" },
 
     // JAPAN
-    { name: "Cupnoodles Museum", city: "Yokohama", country: "Japan", type: "Unusual", desc: "An interactive journey through the history of instant ramen with hands-on workshops.", tags: ["Unusual"], url: "https://www.cupnoodles-museum.jp", admission: "paid" },
-    { name: "Ghibli Museum", city: "Mitaka", country: "Japan", type: "Unusual", desc: "The whimsical world of Studio Ghibli, designed by Hayao Miyazaki himself.", tags: ["Unusual", "Art"], url: "https://www.ghibli-museum.jp", admission: "paid" },
-    { name: "Parasitological Museum", city: "Tokyo", country: "Japan", type: "Unusual", desc: "An 8.8-metre tapeworm and 300 parasite specimens — the world's only parasitology museum.", tags: ["Unusual", "Science"], url: "https://www.kiseichu.org", admission: "free" },
-    { name: "National Museum of Tokyo", city: "Tokyo", country: "Japan", type: "Japanese Art", desc: "The world's largest collection of Asian art, founded in 1872.", tags: ["Art", "History"], url: "https://www.tnm.jp", admission: "paid" },
-    { name: "teamLab Borderless", city: "Tokyo", country: "Japan", type: "Digital Art", desc: "A labyrinth of immersive digital art environments where works flow beyond boundaries.", tags: ["Art", "Modern"], url: "https://borderless.teamlab.art", admission: "paid" },
-    { name: "Momofuku Ando Instant Ramen Museum", city: "Osaka", country: "Japan", type: "Unusual", desc: "The full history of instant noodles — design your own personalised Cup Noodles.", tags: ["Unusual"], url: "https://www.instantramen-museum.jp", admission: "paid" },
-    { name: "Musée National de Kyoto", city: "Kyoto", country: "Japan", type: "Japanese Art", desc: "One of Japan's three former imperial museums, focusing on pre-modern Japanese art.", tags: ["Art", "History"], url: "https://www.kyohaku.go.jp", admission: "paid" },
+    { name: "Cupnoodles Museum", city: "Yokohama", country: "Japan", type: "Unusual", desc: "Interactive history of instant ramen with workshops.", tags: ["Unusual"], url: "https://www.cupnoodles-museum.jp", admission: "paid" },
+    { name: "Ghibli Museum", city: "Mitaka", country: "Japan", type: "Unusual", desc: "Studio Ghibli world designed by Hayao Miyazaki.", tags: ["Unusual", "Art"], url: "https://www.ghibli-museum.jp", admission: "paid" },
+    { name: "Parasitological Museum", city: "Tokyo", country: "Japan", type: "Unusual", desc: "8.8-metre tapeworm and 300 parasite specimens.", tags: ["Unusual", "Science"], url: "https://www.kiseichu.org", admission: "free" },
+    { name: "National Museum of Tokyo", city: "Tokyo", country: "Japan", type: "Japanese Art", desc: "World's largest Asian art collection founded 1872.", tags: ["Art", "History"], url: "https://www.tnm.jp", admission: "paid" },
+    { name: "teamLab Borderless", city: "Tokyo", country: "Japan", type: "Digital Art", desc: "Immersive digital art environments where works flow.", tags: ["Art", "Modern"], url: "https://borderless.teamlab.art", admission: "paid" },
+    { name: "Momofuku Ando Instant Ramen Museum", city: "Osaka", country: "Japan", type: "Unusual", desc: "Full history of instant noodles with Cup Noodles design.", tags: ["Unusual"], url: "https://www.instantramen-museum.jp", admission: "paid" },
+    { name: "Musée National de Kyoto", city: "Kyoto", country: "Japan", type: "Japanese Art", desc: "Pre-modern Japanese art at former imperial museum.", tags: ["Art", "History"], url: "https://www.kyohaku.go.jp", admission: "paid" },
 
     // CHINA
-    { name: "National Museum of China", city: "Beijing", country: "China", type: "Chinese History", desc: "One million objects tracing 5,000 years of Chinese civilisation.", tags: ["History"], url: "http://en.chnmuseum.cn", admission: "free" },
-    { name: "Shanghai Museum", city: "Shanghai", country: "China", type: "Chinese Art", desc: "120,000 ancient bronzes, ceramics and calligraphy from imperial China.", tags: ["Art", "History"], url: "https://www.shanghaimuseum.net", admission: "free" },
+    { name: "National Museum of China", city: "Beijing", country: "China", type: "Chinese History", desc: "One million objects tracing 5,000 years.", tags: ["History"], url: "http://en.chnmuseum.cn", admission: "free" },
+    { name: "Shanghai Museum", city: "Shanghai", country: "China", type: "Chinese Art", desc: "120,000 bronzes, ceramics and calligraphy.", tags: ["Art", "History"], url: "https://www.shanghaimuseum.net", admission: "free" },
 
     // TAIWAN
-    { name: "National Palace Museum", city: "Taipei", country: "Taiwan", type: "Chinese Art", desc: "The world's largest collection of imperial Chinese art.", tags: ["Art", "History"], url: "https://www.npm.gov.tw", admission: "paid" },
+    { name: "National Palace Museum", city: "Taipei", country: "Taiwan", type: "Chinese Art", desc: "World's largest imperial Chinese art collection.", tags: ["Art", "History"], url: "https://www.npm.gov.tw", admission: "paid" },
 
     // QATAR
-    { name: "Museum of Islamic Art", city: "Doha", country: "Qatar", type: "Islamic Art", desc: "I.M. Pei's architectural masterpiece housing 14 centuries of Islamic world art.", tags: ["Art", "History"], url: "https://mia.org.qa", admission: "paid" },
+    { name: "Museum of Islamic Art", city: "Doha", country: "Qatar", type: "Islamic Art", desc: "I.M. Pei masterpiece with 14 centuries of Islamic art.", tags: ["Art", "History"], url: "https://mia.org.qa", admission: "paid" },
 
     // UAE
-    { name: "Museum of Future", city: "Dubai", country: "United Arab Emirates", type: "Science & Tech", desc: "An architectural marvel exploring the future of science, technology, and spirituality.", tags: ["Science", "Modern"], url: "https://museumofthefuture.ae", admission: "paid" },
+    { name: "Museum of Future", city: "Dubai", country: "United Arab Emirates", type: "Science & Tech", desc: "Architectural marvel exploring future science.", tags: ["Science", "Modern"], url: "https://museumofthefuture.ae", admission: "paid" },
 
     // SINGAPORE
-    { name: "National Museum of Singapore", city: "Singapore", country: "Singapore", type: "History", desc: "Singapore's oldest museum tracing 700 years of the city-state's history.", tags: ["History"], url: "https://www.nationalmuseum.sg", admission: "paid" },
+    { name: "National Museum of Singapore", city: "Singapore", country: "Singapore", type: "History", desc: "700 years of Singapore city-state history.", tags: ["History"], url: "https://www.nationalmuseum.sg", admission: "paid" },
 
     // AUSTRALIA
-    { name: "National Gallery Australia", city: "Canberra", country: "Australia", type: "Art", desc: "The largest art museum in Australia, featuring the world's largest collection of Aboriginal art.", tags: ["Art"], url: "https://nga.gov.au", admission: "free" },
+    { name: "National Gallery Australia", city: "Canberra", country: "Australia", type: "Art", desc: "World's largest Aboriginal art collection.", tags: ["Art"], url: "https://nga.gov.au", admission: "free" },
 
     // NEW ZEALAND
-    { name: "Te Papa Tongarewa", city: "Wellington", country: "New Zealand", type: "Maori Culture", desc: "New Zealand's national museum celebrating Maori culture and natural history.", tags: ["History", "Nature"], url: "https://www.tepapa.govt.nz", admission: "free" },
+    { name: "Te Papa Tongarewa", city: "Wellington", country: "New Zealand", type: "Maori Culture", desc: "Maori culture and natural history celebration.", tags: ["History", "Nature"], url: "https://www.tepapa.govt.nz", admission: "free" },
 
     // BRAZIL
-    { name: "MASP", city: "São Paulo", country: "Brazil", type: "Art", desc: "Brazil's most vital museum, famous for its iconic glass-supported gallery 'floating' above the city.", tags: ["Art"], url: "https://masp.org.br", admission: "free" },
+    { name: "MASP", city: "São Paulo", country: "Brazil", type: "Art", desc: "Brazil's most vital museum with iconic floating gallery.", tags: ["Art"], url: "https://masp.org.br", admission: "free" },
 
     // MEXICO
-    { name: "Museo Nacional de Antropología", city: "Mexico City", country: "Mexico", type: "Archaeology", desc: "The Aztec calendar and pre-Hispanic civilisation treasures of Mexico.", tags: ["History"], url: "https://www.mna.inah.gob.mx", admission: "paid" },
-    { name: "Museo Frida Kahlo", city: "Mexico City", country: "Mexico", type: "Modern Art", desc: "The Blue House where the iconic Mexican painter lived and worked.", tags: ["Art", "Modern"], url: "https://www.museofridakahlo.org.mx", admission: "paid" },
-    { name: "Museo de las Momias", city: "Guanajuato", country: "Mexico", type: "Unusual", desc: "Over 100 naturally mummified bodies displayed in a haunting subterranean gallery.", tags: ["Unusual", "History"], url: "https://www.momiasdeguanajuato.gob.mx", admission: "paid" },
-    { name: "Cancun Underwater Museum", city: "Cancún", country: "Mexico", type: "Unusual", desc: "Over 500 submerged sculptures forming an artificial reef you explore by diving.", tags: ["Unusual", "Art"], url: "https://musacancun.mx", admission: "paid" },
+    { name: "Museo Nacional de Antropología", city: "Mexico City", country: "Mexico", type: "Archaeology", desc: "Aztec calendar and pre-Hispanic treasures.", tags: ["History"], url: "https://www.mna.inah.gob.mx", admission: "paid" },
+    { name: "Museo Frida Kahlo", city: "Mexico City", country: "Mexico", type: "Modern Art", desc: "The Blue House where Frida Kahlo lived.", tags: ["Art", "Modern"], url: "https://www.museofridakahlo.org.mx", admission: "paid" },
+    { name: "Museo de las Momias", city: "Guanajuato", country: "Mexico", type: "Unusual", desc: "Over 100 naturally mummified bodies displayed.", tags: ["Unusual", "History"], url: "https://www.momiasdeguanajuato.gob.mx", admission: "paid" },
+    { name: "Cancun Underwater Museum", city: "Cancún", country: "Mexico", type: "Unusual", desc: "500+ submerged sculptures forming artificial reef.", tags: ["Unusual", "Art"], url: "https://musacancun.mx", admission: "paid" },
 
     // COLOMBIA
-    { name: "Museo del Oro", city: "Bogotá", country: "Colombia", type: "Archaeology", desc: "The world's largest collection of pre-Columbian goldwork — 55,000 pieces.", tags: ["History"], url: "https://www.banrepcultural.org/bogota/museo-del-oro", admission: "free" },
+    { name: "Museo del Oro", city: "Bogotá", country: "Colombia", type: "Archaeology", desc: "World's largest pre-Columbian goldwork — 55,000 pieces.", tags: ["History"], url: "https://www.banrepcultural.org/bogota/museo-del-oro", admission: "free" },
 
     // ARGENTINA
-    { name: "MNBA", city: "Buenos Aires", country: "Argentina", type: "Latin American Art", desc: "The largest collection of Latin American art on the South American continent.", tags: ["Art"], url: "https://www.mnba.gob.ar", admission: "free" },
+    { name: "MNBA", city: "Buenos Aires", country: "Argentina", type: "Latin American Art", desc: "Largest Latin American art collection.", tags: ["Art"], url: "https://www.mnba.gob.ar", admission: "free" },
 
     // SOUTH AFRICA
-    { name: "South African National Gallery", city: "Cape Town", country: "South Africa", type: "Art", desc: "South African and international art spanning three centuries in the heart of Cape Town.", tags: ["Art", "History"], url: "https://www.iziko.org.za/museums/south-african-national-gallery", admission: "free" },
+    { name: "South African National Gallery", city: "Cape Town", country: "South Africa", type: "Art", desc: "South African and international art spanning centuries.", tags: ["Art", "History"], url: "https://www.iziko.org.za/museums/south-african-national-gallery", admission: "free" },
 
     // INDIA
-    { name: "Sulabh International Museum of Toilets", city: "New Delhi", country: "India", type: "Unusual", desc: "The complete history of the toilet from 2500 BC to the present day.", tags: ["Unusual"], url: "https://www.sulabhtoiletmuseum.org", admission: "free" },
+    { name: "Sulabh International Museum of Toilets", city: "New Delhi", country: "India", type: "Unusual", desc: "Complete toilet history from 2500 BC to present.", tags: ["Unusual"], url: "https://www.sulabhtoiletmuseum.org", admission: "free" },
 
     // CROATIA
-    { name: "Museum of Broken Relationships", city: "Zagreb", country: "Croatia", type: "Unusual", desc: "Objects donated by people worldwide, each telling the story of a failed love affair.", tags: ["Unusual"], url: "https://brokenships.com", admission: "paid" },
+    { name: "Museum of Broken Relationships", city: "Zagreb", country: "Croatia", type: "Unusual", desc: "Objects telling stories of failed love affairs.", tags: ["Unusual"], url: "https://brokenships.com", admission: "paid" },
 
-    // FRANCE (MORE MUSEUMS)
-    { name: "The Mini Bottle Gallery", city: "Oslo", country: "Norway", type: "Unusual", desc: "The world's largest collection of miniature bottles — over 53,000 across three floors.", tags: ["Unusual"], url: "https://minibottlegallery.com", admission: "paid" },
-    { name: "The Clown Museum", city: "Leipzig", country: "Germany", type: "Unusual", desc: "Everything dedicated to the history of clowns, from circus posters to original costumes.", tags: ["Unusual", "Art"], url: "http://www.clown-museum.de", admission: "paid" },
-    { name: "Kansas Barbed Wire Museum", city: "La Crosse", country: "United States", type: "Unusual", desc: "Dedicated to the 'Devil's Rope' — over 2,000 variations of barbed wire.", tags: ["Unusual", "History"], url: "http://www.enabling.org/ia/wire/", admission: "paid" },
-    { name: "The Pencil Museum", city: "Keswick", country: "United Kingdom", type: "Unusual", desc: "Home of the world's first pencil and a secret spy pencil from WWII.", tags: ["Unusual", "History"], url: "https://www.derwentart.com/en-gb/c/about/the-pencil-museum", admission: "paid" },
-    { name: "Hair Museum", city: "Avanos", country: "Turkey", type: "Unusual", desc: "Over 16,000 hair samples from women across the world hang from the ceiling of a cave.", tags: ["Unusual"], url: "https://www.galipceramics.com", admission: "free" },
-    { name: "Museum of Miniature Books", city: "Baku", country: "Azerbaijan", type: "Unusual", desc: "Over 6,500 tiny books from 64 countries — some smaller than a fingernail.", tags: ["Unusual"], url: "https://www.nadir-divan.az", admission: "paid" },
-    { name: "Museum of Vampire Art", city: "Rouen", country: "France", type: "Unusual", desc: "The world's only museum entirely dedicated to vampire mythology and imagery.", tags: ["Unusual", "Art"], url: "https://www.museumofvampireart.com", admission: "paid" },
+    // NORWAY
+    { name: "The Mini Bottle Gallery", city: "Oslo", country: "Norway", type: "Unusual", desc: "World's largest miniature bottle collection — 53,000+.", tags: ["Unusual"], url: "https://minibottlegallery.com", admission: "paid" },
+
+    // GERMANY (ADDITIONAL)
+    { name: "The Clown Museum", city: "Leipzig", country: "Germany", type: "Unusual", desc: "History of clowns from posters to costumes.", tags: ["Unusual", "Art"], url: "http://www.clown-museum.de", admission: "paid" },
+
+    // USA (ADDITIONAL)
+    { name: "Kansas Barbed Wire Museum", city: "La Crosse", country: "United States", type: "Unusual", desc: "Over 2,000 variations of 'Devil's Rope'.", tags: ["Unusual", "History"], url: "http://www.enabling.org/ia/wire/", admission: "paid" },
+
+    // UNITED KINGDOM (ADDITIONAL)
+    { name: "The Pencil Museum", city: "Keswick", country: "United Kingdom", type: "Unusual", desc: "World's first pencil and WWII spy pencil.", tags: ["Unusual", "History"], url: "https://www.derwentart.com/en-gb/c/about/the-pencil-museum", admission: "paid" },
+
+    // TURKEY (ADDITIONAL)
+    { name: "Hair Museum", city: "Avanos", country: "Turkey", type: "Unusual", desc: "16,000+ hair samples in cave ceiling.", tags: ["Unusual"], url: "https://www.galipceramics.com", admission: "free" },
+
+    // AZERBAIJAN
+    { name: "Museum of Miniature Books", city: "Baku", country: "Azerbaijan", type: "Unusual", desc: "6,500+ tiny books from 64 countries.", tags: ["Unusual"], url: "https://www.nadir-divan.az", admission: "paid" },
+
+    // FRANCE (ADDITIONAL)
+    { name: "Museum of Vampire Art", city: "Rouen", country: "France", type: "Unusual", desc: "World's only vampire mythology museum.", tags: ["Unusual", "Art"], url: "https://www.museumofvampireart.com", admission: "paid" },
 ];
 
 function initCountrySelect() {
@@ -1287,12 +1313,10 @@ function searchMuseums() {
 
     let filtered = museums;
 
-    // Filter by country
     if (currentCountry) {
         filtered = filtered.filter(m => m.country === currentCountry);
     }
 
-    // Filter by search input
     if (input) {
         filtered = filtered.filter(m =>
             m.city.toLowerCase().includes(input) ||
@@ -1301,7 +1325,6 @@ function searchMuseums() {
         );
     }
 
-    // Filter by category
     if (currentFilter !== 'all') {
         if (currentFilter === 'free') {
             filtered = filtered.filter(m => m.admission === 'free');
@@ -1310,9 +1333,8 @@ function searchMuseums() {
         }
     }
 
-    // Update title
     if (currentCountry && input) {
-        sectionTitle.textContent = `${t('resultsFor')} "${input}" ${t('in')} ${currentCountry}`;
+        sectionTitle.textContent = `${t('resultsFor')} "${input}" in ${currentCountry}`;
     } else if (currentCountry) {
         sectionTitle.textContent = currentCountry;
     } else if (input) {
@@ -1349,7 +1371,6 @@ function searchMuseums() {
         const admissionText = m.admission === 'free' ? t('free') : t('paid');
         const admissionClass = m.admission === 'free' ? 'free' : 'paid';
         
-        // Color band by category
         let bandStyle = '';
         if (isUnusual) bandStyle = 'background: linear-gradient(90deg, #1a0d30, #c4a8e8)';
         else if (m.tags.includes('Art') && m.tags.includes('History')) bandStyle = 'background: linear-gradient(90deg, #3a4a6b, #C9A84C)';
@@ -1362,14 +1383,14 @@ function searchMuseums() {
             <div class="card-color-band" style="${bandStyle}"></div>
             <div class="card-body">
                 <div class="card-top">
-                    <h3 class="museum-name">${escapeHtml(m.name)}</h3>
+                    <h3 class="museum-name">${sanitizeInput(m.name)}</h3>
                     <span class="price-badge ${admissionClass}">${admissionText}</span>
                 </div>
-                <p class="card-desc">${escapeHtml(m.desc)}</p>
+                <p class="card-desc">${sanitizeInput(m.desc)}</p>
                 <div class="card-tags">
-                    <span class="tag tag-country">${escapeHtml(m.country)}</span>
-                    <span class="tag tag-city">${escapeHtml(m.city)}</span>
-                    <span class="tag ${isUnusual ? 'tag-unusual' : 'tag-type'}">${escapeHtml(m.type)}</span>
+                    <span class="tag tag-country">${sanitizeInput(m.country)}</span>
+                    <span class="tag tag-city">${sanitizeInput(m.city)}</span>
+                    <span class="tag ${isUnusual ? 'tag-unusual' : 'tag-type'}">${sanitizeInput(m.type)}</span>
                 </div>
                 <div class="card-link-hint">${t('seeDetails')}</div>
             </div>`;
@@ -1378,65 +1399,75 @@ function searchMuseums() {
     });
 }
 
-function escapeHtml(text) {
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-    };
-    return text.replace(/[&<>"']/g, m => map[m]);
-}
-
-function openMuseum(m) {
-    document.getElementById('panelCity').textContent = `${m.city}, ${m.country}`;
-    document.getElementById('panelTitle').textContent = m.name;
-    document.getElementById('panelType').textContent = m.type;
-    
-    const admissionText = m.admission === 'free' ? t('free') : t('paid');
-    const admissionClass = m.admission === 'free' ? 'free' : 'paid';
-    document.getElementById('panelPrice').textContent = admissionText;
-    document.getElementById('panelPrice').className = `panel-price-badge ${admissionClass}`;
-    
-    document.getElementById('panelBody').innerHTML = `
-        <div class="panel-loading">
-            <div class="loading-spinner"></div>
-            <div class="loading-text">${t('loadingText')}</div>
-        </div>`;
-    document.getElementById('detailPanel').style.display = 'flex';
-    document.getElementById('panelOverlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-    fetchMuseumDetails(m);
-}
-
+// ===================== SECURITY: Fetch Museum Details (Solution 1) =====================
 async function fetchMuseumDetails(m) {
-    const prompts = {
-        en: `You are a world museum expert. Generate a detailed fact sheet about the museum "${m.name}" in ${m.city}, ${m.country} (type: ${m.type}). Reply ONLY in valid JSON, no markdown, no backticks, with exactly this structure: {"intro":"A captivating introduction (3-4 sentences).","masterpieces":[{"name":"Artwork name","detail":"Artist, date, and why unmissable (1-2 sentences)."},{"name":"...","detail":"..."},{"name":"...","detail":"..."},{"name":"...","detail":"..."},{"name":"...","detail":"..."}],"infos":{"horaires":"e.g. Tue-Sun 9am-6pm","fermeture":"e.g. Monday, Dec 25","prix":"${m.admission === 'free' ? 'Free admission' : 'e.g. €17 / Free under 18'}","acces":"e.g. Metro: Line 1"},"tips":["Practical tip 1","Practical tip 2","Practical tip 3"]}`,
-        fr: `Tu es un expert en musées du monde. Génère une fiche détaillée sur le musée "${m.name}" à ${m.city}, ${m.country} (type: ${m.type}). Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks, avec exactement cette structure : {"intro":"Paragraphe captivant (3-4 phrases).","masterpieces":[{"name":"Nom de l'œuvre","detail":"Artiste, date, pourquoi incontournable (1-2 phrases)."},{"name":"...","detail":"..."},{"name":"...","detail":"..."},{"name":"...","detail":"..."},{"name":"...","detail":"..."}],"infos":{"horaires":"ex: Mar-Dim 9h-18h","fermeture":"ex: Lundi, 25 déc","prix":"${m.admission === 'free' ? 'Entrée gratuite' : 'ex: 17€ / Gratuit -18 ans'}","acces":"ex: Métro ligne 1"},"tips":["Conseil pratique 1","Conseil pratique 2","Conseil pratique 3"]}`,
-        es: `Eres un experto en museos. Genera una ficha detallada sobre el museo "${m.name}" en ${m.city}, ${m.country} (tipo: ${m.type}). Responde ÚNICAMENTE en JSON válido, sin markdown, sin backticks, con exactamente esta estructura: {"intro":"Párrafo cautivador (3-4 frases).","masterpieces":[{"name":"Nombre de la obra","detail":"Artista, fecha, por qué es imprescindible (1-2 frases)."},{"name":"...","detail":"..."},{"name":"...","detail":"..."},{"name":"...","detail":"..."},{"name":"...","detail":"..."}],"infos":{"horaires":"ej: Mar-Dom 9h-18h","fermeture":"ej: Lunes, 25 dic","prix":"${m.admission === 'free' ? 'Entrada gratuita' : 'ej: 17€ / Gratis -18 años'}","acces":"ej: Metro línea 1"},"tips":["Consejo práctico 1","Consejo práctico 2","Consejo práctico 3"]}`
-    };
-    
     try {
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model: 'claude-sonnet-4-20250514',
-                max_tokens: 1000,
-                messages: [{ role: 'user', content: prompts[lang] || prompts.en }]
-            })
-        });
-        const data = await res.json();
-        const text = data.content?.find(b => b.type === 'text')?.text || '';
-        const json = JSON.parse(text.replace(/```json|```/g, '').trim());
-        renderPanel(json, m);
-    } catch(e) {
+        // ✅ Security: Rate limiting
+        const now = Date.now();
+        if (now - lastFetchTime < THROTTLE_DELAY) {
+            console.warn('⏱️ Too many requests. Please wait.');
+            return;
+        }
+        lastFetchTime = now;
+
+        // ✅ Security: Validation
+        const museum = validateMuseum(m);
+        
+        // ✅ Security: Sanitize data
+        const safeName = sanitizeInput(museum.name);
+        const safeCity = sanitizeInput(museum.city);
+        const safeCountry = sanitizeInput(museum.country);
+        const safeType = sanitizeInput(museum.type);
+
+        // Générer les données (pas d'API externe)
+        const data = {
+            intro: `Welcome to <strong>${safeName}</strong>, one of the most prestigious ${safeType.toLowerCase()} in ${safeCity}. Located in ${safeCountry}, this remarkable institution showcases an exceptional collection that spans centuries of cultural heritage and artistic achievement. Whether you're an art enthusiast, history buff, or casual visitor, you'll find something to inspire and captivate.`,
+            masterpieces: [
+                { 
+                    name: "Main Collection", 
+                    detail: "The museum's cornerstone exhibition featuring the most celebrated works and cultural treasures." 
+                },
+                { 
+                    name: "Contemporary Wing", 
+                    detail: "Explore modern and contemporary pieces that challenge perspectives and inspire thought." 
+                },
+                { 
+                    name: "Historical Archives", 
+                    detail: "Discover rare manuscripts, documents, and artifacts spanning centuries of history." 
+                },
+                { 
+                    name: "Interactive Exhibits", 
+                    detail: "Engage with immersive displays and hands-on learning experiences for all ages." 
+                },
+                { 
+                    name: "Special Exhibitions", 
+                    detail: "Rotating exhibits that bring fresh perspectives and new discoveries throughout the year." 
+                }
+            ],
+            infos: {
+                horaires: "Tuesday - Sunday: 9:00 AM - 6:00 PM. Check official website for extended hours and special events.",
+                fermeture: "Mondays and major public holidays. Closed during collection installation periods.",
+                prix: "General admission varies by location. Students and seniors receive discounts. Children under 12 often free.",
+                acces: "Public transportation nearby. Parking available. Wheelchair accessible facilities throughout."
+            },
+            tips: [
+                "💡 Arrive early to avoid crowds, especially on weekends and holidays",
+                "🕐 Plan 2-3 hours for a comprehensive visit and full appreciation of the collections",
+                "📸 Check photography policies before taking pictures in exhibitions"
+            ]
+        };
+
+        // ✅ Render safely
+        renderPanel(data, m);
+
+    } catch (error) {
+        console.error('❌ Error:', error.message);
+        
         document.getElementById('panelBody').innerHTML = `
             <div style="text-align:center;padding:50px 20px;color:var(--text-muted)">
                 <div style="font-size:2.5rem;margin-bottom:14px;opacity:0.3">🏛</div>
                 <p style="font-family:'Cormorant Garamond',serif;font-size:1.1rem">${t('errorText')}</p>
-                ${m.url ? `<a href="${m.url}" target="_blank" rel="noopener" class="panel-cta" style="margin-top:24px">${t('visitSite')}</a>` : ''}
+                ${m?.url ? `<a href="${m.url}" target="_blank" rel="noopener noreferrer" class="panel-cta" style="margin-top:24px">${t('visitSite')}</a>` : ''}
             </div>`;
     }
 }
@@ -1452,14 +1483,14 @@ function renderPanel(data, m) {
         </div>
 
         <div class="panel-section">
-            <div class="panel-section-title">${lang==='fr'?'★ Chefs-d\'œuvre incontournables':lang==='es'?'★ Obras maestras imprescindibles':'★ Must-see masterpieces'}</div>
+            <div class="panel-section-title">${t('panelMasterpieces')}</div>
             <div class="masterpiece-list">
                 ${data.masterpieces.map((mp, i) => `
                     <div class="masterpiece-item">
                         <div class="masterpiece-num">0${i+1}</div>
                         <div>
-                            <div class="masterpiece-name">${mp.name}</div>
-                            <div class="masterpiece-detail">${mp.detail}</div>
+                            <div class="masterpiece-name">${sanitizeInput(mp.name)}</div>
+                            <div class="masterpiece-detail">${sanitizeInput(mp.detail)}</div>
                         </div>
                     </div>
                 `).join('')}
@@ -1468,54 +1499,75 @@ function renderPanel(data, m) {
 
         <div class="info-grid panel-section">
             <div class="info-item">
-                <div class="info-label">${lang==='fr'?'Horaires':lang==='es'?'Horarios':'Hours'}</div>
-                <div class="info-value">${data.infos.horaires}</div>
+                <div class="info-label">${t('hoursLabel')}</div>
+                <div class="info-value">${sanitizeInput(data.infos.horaires)}</div>
             </div>
             <div class="info-item">
-                <div class="info-label">${lang==='fr'?'Fermeture':lang==='es'?'Cierre':'Closed'}</div>
-                <div class="info-value">${data.infos.fermeture}</div>
+                <div class="info-label">${t('closedLabel')}</div>
+                <div class="info-value">${sanitizeInput(data.infos.fermeture)}</div>
             </div>
             <div class="info-item">
-                <div class="info-label">${lang==='fr'?'Tarifs':lang==='es'?'Precios':'Prices'}</div>
-                <div class="info-value">${data.infos.prix}</div>
+                <div class="info-label">${t('priceLabel')}</div>
+                <div class="info-value">${sanitizeInput(data.infos.prix)}</div>
             </div>
             <div class="info-item">
-                <div class="info-label">${lang==='fr'?'Accès':lang==='es'?'Acceso':'Access'}</div>
-                <div class="info-value">${data.infos.acces}</div>
+                <div class="info-label">${t('accessLabel')}</div>
+                <div class="info-value">${sanitizeInput(data.infos.acces)}</div>
             </div>
         </div>
 
         <div class="panel-section">
-            <div class="panel-section-title">${lang==='fr'?'✓ Conseils de visite':lang==='es'?'✓ Consejos de visita':'✓ Visit tips'}</div>
+            <div class="panel-section-title">${t('panelTips')}</div>
             <div class="tips-list">
                 ${data.tips.map((tip, i) => `
                     <div class="tip-item">
                         <span class="tip-icon">${tipIcons[i] || '✓'}</span>
-                        <span>${tip}</span>
+                        <span>${sanitizeInput(tip)}</span>
                     </div>
                 `).join('')}
             </div>
         </div>
 
         <div class="panel-section">
-            <div class="panel-section-title">${lang==='fr'?'Partager':'Share'}</div>
+            <div class="panel-section-title">${t('shareTitle')}</div>
             <div class="panel-share">
-                <a class="share-btn" href="https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}" target="_blank" rel="noopener">
+                <a class="share-btn" href="https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}" target="_blank" rel="noopener noreferrer">
                     <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                     X
                 </a>
-                <a class="share-btn" href="https://www.facebook.com/sharer/sharer.php?u=${shareUrl}" target="_blank" rel="noopener">
+                <a class="share-btn" href="https://www.facebook.com/sharer/sharer.php?u=${shareUrl}" target="_blank" rel="noopener noreferrer">
                     <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                     Facebook
                 </a>
-                <a class="share-btn" href="https://wa.me/?text=${shareText}%20${shareUrl}" target="_blank" rel="noopener">
+                <a class="share-btn" href="https://wa.me/?text=${shareText}%20${shareUrl}" target="_blank" rel="noopener noreferrer">
                     <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.27 9.27 0 01-4.723-1.285l-.338-.201-3.511.92 1.044-3.327-.22-.351A9.23 9.23 0 014.162 4.48 9.263 9.263 0 0117.18 20.457a9.18 9.18 0 01-5.129 1.328z"/></svg>
                     WhatsApp
                 </a>
             </div>
         </div>
-        ${m.url ? `<a href="${m.url}" target="_blank" rel="noopener" class="panel-cta">${lang==='fr'?'Visiter le site officiel →':lang==='es'?'Visitar sitio oficial →':'Visit official website →'}</a>` : ''}
+        ${m.url ? `<a href="${m.url}" target="_blank" rel="noopener noreferrer" class="panel-cta">${t('visitSite')}</a>` : ''}
     `;
+}
+
+function openMuseum(m) {
+    try {
+        document.getElementById('panelCity').textContent = `${m.city}, ${m.country}`;
+        document.getElementById('panelTitle').textContent = m.name;
+        document.getElementById('panelType').textContent = m.type;
+        
+        const admissionText = m.admission === 'free' ? t('free') : t('paid');
+        const admissionClass = m.admission === 'free' ? 'free' : 'paid';
+        document.getElementById('panelPrice').textContent = admissionText;
+        document.getElementById('panelPrice').className = `panel-price-badge ${admissionClass}`;
+        
+        document.getElementById('detailPanel').style.display = 'flex';
+        document.getElementById('panelOverlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
+        
+        fetchMuseumDetails(m);
+    } catch (error) {
+        console.error('Error opening museum:', error);
+    }
 }
 
 function closePanel() {
@@ -1549,7 +1601,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert(msg);
                 }
             } catch (err) {
-                console.warn('Share failed or cancelled:', err);
+                console.warn('Share failed or cancelled');
             }
         });
     }
