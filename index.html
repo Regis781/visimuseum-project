@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-3P21T5KZN9"></script>
@@ -12,15 +12,128 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <!-- Security Headers -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'none';">
+
+    <!-- ============================================================ -->
+    <!-- SEO CORE                                                      -->
+    <!-- ============================================================ -->
+    <title>VisiMuseum — Find Your Next Museum | World's Best Museums</title>
+    <meta name="description" content="Discover the world's greatest museums in one place. Search by city, country or type — art, history, science, nature and more. Free & paid entry. Available in English, French and Spanish.">
+    <meta name="keywords" content="museum, museums, art museum, history museum, science museum, free museum, museum guide, find museum, visit museum, world museums, musée, museo">
+    <meta name="author" content="VisiMuseum">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="theme-color" content="#07111c">
+    <link rel="canonical" href="https://www.visimuseum.com/">
+
+    <!-- ============================================================ -->
+    <!-- OPEN GRAPH (Facebook, LinkedIn, WhatsApp…)                   -->
+    <!-- ============================================================ -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.visimuseum.com/">
+    <meta property="og:title" content="VisiMuseum — Find Your Next Museum">
+    <meta property="og:description" content="Discover the world's greatest museums in one place. Search by city, country or type — art, history, science, nature and more.">
+    <meta property="og:image" content="https://www.visimuseum.com/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="VisiMuseum — Explore the world's greatest museums">
+    <meta property="og:site_name" content="VisiMuseum">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:locale:alternate" content="fr_FR">
+    <meta property="og:locale:alternate" content="es_ES">
+
+    <!-- ============================================================ -->
+    <!-- TWITTER / X CARD                                              -->
+    <!-- ============================================================ -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@visimuseum">
+    <meta name="twitter:creator" content="@visimuseum">
+    <meta name="twitter:title" content="VisiMuseum — Find Your Next Museum">
+    <meta name="twitter:description" content="Discover the world's greatest museums in one place. Search by city, country or type.">
+    <meta name="twitter:image" content="https://www.visimuseum.com/og-image.jpg">
+    <meta name="twitter:image:alt" content="VisiMuseum — Explore the world's greatest museums">
+
+    <!-- ============================================================ -->
+    <!-- HREFLANG (Multilingue SEO)                                   -->
+    <!-- ============================================================ -->
+    <link rel="alternate" hreflang="en" href="https://www.visimuseum.com/?lang=en">
+    <link rel="alternate" hreflang="fr" href="https://www.visimuseum.com/?lang=fr">
+    <link rel="alternate" hreflang="es" href="https://www.visimuseum.com/?lang=es">
+    <link rel="alternate" hreflang="x-default" href="https://www.visimuseum.com/">
+
+    <!-- ============================================================ -->
+    <!-- STRUCTURED DATA — JSON-LD (Schema.org)                       -->
+    <!-- ============================================================ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "VisiMuseum",
+      "alternateName": "VisiMuseum — Find Your Next Museum",
+      "url": "https://www.visimuseum.com/",
+      "description": "Discover the world's greatest museums in one place. Search by city, country or type.",
+      "inLanguage": ["en", "fr", "es"],
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://www.visimuseum.com/?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "VisiMuseum",
+        "url": "https://www.visimuseum.com/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.visimuseum.com/logo.png",
+          "width": 200,
+          "height": 60
+        }
+      }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "VisiMuseum",
+      "url": "https://www.visimuseum.com/",
+      "description": "A comprehensive guide to the world's greatest museums.",
+      "sameAs": [
+        "https://twitter.com/visimuseum",
+        "https://www.facebook.com/visimuseum"
+      ]
+    }
+    </script>
+
+    <!-- ============================================================ -->
+    <!-- FAVICON & APP ICONS                                           -->
+    <!-- ============================================================ -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%2307111c'/><text y='72' x='12' font-size='65' font-family='serif'>🏛</text></svg>">
+    <link rel="apple-touch-icon" href="https://www.visimuseum.com/apple-touch-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="VisiMuseum">
+
+    <!-- ============================================================ -->
+    <!-- PERFORMANCE — PRECONNECT & PRELOAD                           -->
+    <!-- ============================================================ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <link rel="dns-prefetch" href="https://api.anthropic.com">
+
+    <!-- ============================================================ -->
+    <!-- SECURITY HEADERS                                              -->
+    <!-- ============================================================ -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.anthropic.com; frame-ancestors 'none';">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    
-    <title>VisiMuseum — Find Your Next Museum</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         /* RESET */
@@ -796,14 +909,75 @@
 
         /* FOOTER */
         footer {
-            text-align: center;
-            padding: 40px;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            border-top: 1px solid var(--cream-dark);
-            letter-spacing: 0.05em;
+            background: var(--navy);
+            color: rgba(255,255,255,0.45);
+            border-top: 1px solid rgba(201,168,76,0.2);
         }
-        footer span { color: var(--gold); }
+        .footer-inner {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 52px 30px 40px;
+            display: flex;
+            gap: 60px;
+            align-items: flex-start;
+        }
+        .footer-brand {
+            flex-shrink: 0;
+        }
+        .footer-logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            color: var(--white);
+        }
+        .footer-logo span { color: var(--gold); }
+        .footer-tagline {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.3);
+            margin-top: 8px;
+            letter-spacing: 0.04em;
+            font-style: italic;
+            max-width: 200px;
+        }
+        .footer-nav {
+            display: flex;
+            gap: 48px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+        .footer-col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 110px;
+        }
+        .footer-col strong {
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 4px;
+        }
+        .footer-col a {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .footer-col a:hover { color: var(--gold-light); }
+        .footer-bottom {
+            text-align: center;
+            padding: 20px 30px;
+            font-size: 0.72rem;
+            letter-spacing: 0.05em;
+            border-top: 1px solid rgba(255,255,255,0.07);
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+        .footer-bottom strong { color: var(--gold); font-weight: 500; }
 
         /* RESPONSIVE */
         @media (max-width: 768px) {
@@ -814,6 +988,8 @@
             .results { grid-template-columns: 1fr; }
             .info-grid { grid-template-columns: 1fr; }
             .card-top { flex-direction: column; gap: 6px; }
+            .footer-inner { flex-direction: column; gap: 32px; padding: 36px 20px 28px; }
+            .footer-nav { gap: 28px; }
         }
     </style>
 </head>
@@ -919,7 +1095,44 @@
     <div class="panel-body" id="panelBody"></div>
 </div>
 
-<footer>&copy; 2026 <span>VisiMuseum</span> &mdash; <span data-i18n="footerRights"></span></footer>
+<!-- ============================================================ -->
+<!-- FOOTER SEO — liens sémantiques + données structurées        -->
+<!-- ============================================================ -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <span class="footer-logo">VISI<span>MUSEUM</span></span>
+            <p class="footer-tagline" data-i18n="subtitle"></p>
+        </div>
+        <nav class="footer-nav" aria-label="Footer navigation">
+            <div class="footer-col">
+                <strong>Explore</strong>
+                <a href="#" onclick="setFilter('Art',document.querySelector('[onclick*=Art]'));return false;">Art Museums</a>
+                <a href="#" onclick="setFilter('History',document.querySelector('[onclick*=History]'));return false;">History Museums</a>
+                <a href="#" onclick="setFilter('Science',document.querySelector('[onclick*=Science]'));return false;">Science Museums</a>
+                <a href="#" onclick="setFilter('Nature',document.querySelector('[onclick*=Nature]'));return false;">Nature Museums</a>
+                <a href="#" onclick="setFilter('free',document.querySelector('.free-btn'));return false;">Free Museums</a>
+            </div>
+            <div class="footer-col">
+                <strong>Languages</strong>
+                <a href="?lang=en">🇬🇧 English</a>
+                <a href="?lang=fr">🇫🇷 Français</a>
+                <a href="?lang=es">🇪🇸 Español</a>
+            </div>
+            <div class="footer-col">
+                <strong>Share</strong>
+                <a href="https://twitter.com/intent/tweet?text=Discover+the+world%27s+greatest+museums&url=https://www.visimuseum.com/" target="_blank" rel="noopener noreferrer">𝕏 Twitter / X</a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=https://www.visimuseum.com/" target="_blank" rel="noopener noreferrer">Facebook</a>
+                <a href="https://wa.me/?text=Discover+museums+worldwide%20https://www.visimuseum.com/" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            </div>
+        </nav>
+    </div>
+    <div class="footer-bottom">
+        <span>&copy; 2026 <strong>VisiMuseum</strong></span>
+        <span>&mdash;</span>
+        <span data-i18n="footerRights"></span>
+    </div>
+</footer>
 
 <script>
 // ===================== TRANSLATIONS =====================
@@ -1119,6 +1332,31 @@ function setLang(l) {
     document.querySelectorAll('.lang-btn').forEach((b, i) => {
         b.classList.toggle('active', ['en', 'fr', 'es'][i] === l);
     });
+
+    // ── SEO dynamique : mise à jour du <html lang> et des balises meta ──
+    const localeMap = { en: 'en_US', fr: 'fr_FR', es: 'es_ES' };
+    document.documentElement.lang = l;
+    const metaOgLocale = document.querySelector('meta[property="og:locale"]');
+    if (metaOgLocale) metaOgLocale.content = localeMap[l] || 'en_US';
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.href = `https://www.visimuseum.com/?lang=${l}`;
+    const metaTitle = document.querySelector('meta[property="og:title"]');
+    if (metaTitle && i18n[l]?.subtitle) {
+        const titles = { en: 'VisiMuseum — Find Your Next Museum', fr: 'VisiMuseum — Trouvez votre prochain musée', es: 'VisiMuseum — Encuentra tu próximo museo' };
+        document.title = titles[l] || titles.en;
+        metaTitle.content = titles[l] || titles.en;
+    }
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc && i18n[l]?.subtitle) {
+        const descs = {
+            en: 'Discover the world\'s greatest museums in one place. Search by city, country or type — art, history, science, nature and more. Free & paid entry.',
+            fr: 'Découvrez les plus grands musées du monde en un seul endroit. Cherchez par ville, pays ou type — art, histoire, science, nature et plus encore.',
+            es: 'Descubre los mejores museos del mundo en un solo lugar. Busca por ciudad, país o tipo — arte, historia, ciencia, naturaleza y mucho más.'
+        };
+        metaDesc.content = descs[l] || descs.en;
+    }
+    // ── fin SEO dynamique ──
+
     applyTranslations();
     searchMuseums();
 }

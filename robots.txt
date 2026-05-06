@@ -1,0 +1,21 @@
+# robots.txt — VisiMuseum
+# https://www.visimuseum.com/
+
+User-agent: *
+Allow: /
+
+# Autoriser les bots des réseaux sociaux pour l'Open Graph
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+# Sitemap
+Sitemap: https://www.visimuseum.com/sitemap.xml
