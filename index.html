@@ -12,6 +12,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- Preload de la police critique pour éviter le flash de texte invisible -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap">
 
     <!-- ============================================================ -->
     <!-- SEO CORE                                                      -->
@@ -22,7 +24,11 @@
     <meta name="author" content="VisiMuseum">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     <meta name="theme-color" content="#07111c">
-    <link rel="canonical" href="https://www.visimuseum.com/">
+    <!-- SEO complémentaire -->
+    <meta name="revisit-after" content="7 days">
+    <meta name="language" content="English">
+    <meta name="rating" content="general">
+    <link rel="canonical" href="https://www.visimuseum.com/" id="canonical-tag">
 
     <!-- ============================================================ -->
     <!-- OPEN GRAPH (Facebook, LinkedIn, WhatsApp…)                   -->
@@ -54,9 +60,10 @@
     <!-- ============================================================ -->
     <!-- HREFLANG (Multilingue SEO)                                   -->
     <!-- ============================================================ -->
-    <link rel="alternate" hreflang="en" href="https://www.visimuseum.com/?lang=en">
-    <link rel="alternate" hreflang="fr" href="https://www.visimuseum.com/?lang=fr">
-    <link rel="alternate" hreflang="es" href="https://www.visimuseum.com/?lang=es">
+    <!-- hreflang : x-default ET en pointent vers / (sans paramètre) car c'est l'URL canonique -->
+    <link rel="alternate" hreflang="en"        href="https://www.visimuseum.com/">
+    <link rel="alternate" hreflang="fr"        href="https://www.visimuseum.com/?lang=fr">
+    <link rel="alternate" hreflang="es"        href="https://www.visimuseum.com/?lang=es">
     <link rel="alternate" hreflang="x-default" href="https://www.visimuseum.com/">
 
     <!-- ============================================================ -->
@@ -73,10 +80,7 @@
       "inLanguage": ["en", "fr", "es"],
       "potentialAction": {
         "@type": "SearchAction",
-        "target": {
-          "@type": "EntryPoint",
-          "urlTemplate": "https://www.visimuseum.com/?q={search_term_string}"
-        },
+        "target": "https://www.visimuseum.com/?q={search_term_string}",
         "query-input": "required name=search_term_string"
       },
       "publisher": {
@@ -103,6 +107,39 @@
       "sameAs": [
         "https://twitter.com/visimuseum",
         "https://www.facebook.com/visimuseum"
+      ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How can I find free museums near me?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Use the 'Free' filter on VisiMuseum to instantly see all museums with free admission worldwide. You can also combine it with the country dropdown to narrow your search."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How many museums does VisiMuseum list?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "VisiMuseum lists hundreds of museums across all continents, covering art, history, science, nature and unusual categories."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is VisiMuseum available in French and Spanish?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. VisiMuseum is fully available in English, French and Spanish. Use the language switcher in the top-right corner to change language."
+          }
+        }
       ]
     }
     </script>
@@ -996,9 +1033,9 @@
 <body>
 
 <div class="lang-switcher">
-    <button class="lang-btn active" onclick="setLang('en')" title="English">🇬🇧</button>
-    <button class="lang-btn" onclick="setLang('fr')" title="Francais">🇫🇷</button>
-    <button class="lang-btn" onclick="setLang('es')" title="Espanol">🇪🇸</button>
+    <button class="lang-btn active" onclick="setLang('en')" title="English" aria-label="Switch to English">🇬🇧</button>
+    <button class="lang-btn" onclick="setLang('fr')" title="Français" aria-label="Passer en Français">🇫🇷</button>
+    <button class="lang-btn" onclick="setLang('es')" title="Español" aria-label="Cambiar a Español">🇪🇸</button>
 </div>
 
 <header>
@@ -1069,12 +1106,12 @@
     </div>
 </div>
 
-<main>
+<main role="main">
     <div class="section-header">
         <h2 class="section-title" id="sectionTitle"></h2>
         <div class="section-line"></div>
     </div>
-    <div class="results" id="resultsGrid"></div>
+    <div class="results" id="resultsGrid" aria-live="polite" aria-label="Museums list"></div>
 </main>
 
 <div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
@@ -1128,11 +1165,16 @@
         </nav>
     </div>
     <div class="footer-bottom">
-        <span>&copy; 2026 <strong>VisiMuseum</strong></span>
+        <span>&copy; <span id="footer-year">2026</span> <strong>VisiMuseum</strong></span>
         <span>&mdash;</span>
         <span data-i18n="footerRights"></span>
     </div>
 </footer>
+
+<script>
+// Année dynamique dans le footer
+document.getElementById('footer-year').textContent = new Date().getFullYear();
+</script>
 
 <script>
 // ===================== TRANSLATIONS =====================
@@ -1284,6 +1326,14 @@ const i18n = {
 };
 
 let lang = 'en';
+// Détection de la langue depuis l'URL (?lang=fr, ?lang=es)
+(function detectLangFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const urlLang = params.get('lang');
+    if (urlLang && ['en', 'fr', 'es'].includes(urlLang)) {
+        lang = urlLang;
+    }
+})();
 let searchTimeout = null;
 let currentFilter = 'all';
 let currentView = 'grid';
@@ -1338,8 +1388,15 @@ function setLang(l) {
     document.documentElement.lang = l;
     const metaOgLocale = document.querySelector('meta[property="og:locale"]');
     if (metaOgLocale) metaOgLocale.content = localeMap[l] || 'en_US';
-    const canonical = document.querySelector('link[rel="canonical"]');
-    if (canonical) canonical.href = `https://www.visimuseum.com/?lang=${l}`;
+    // Canonical : l'anglais (défaut) pointe vers / sans paramètre
+    // Les autres langues pointent vers /?lang=xx
+    const canonical = document.getElementById('canonical-tag') || document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.href = l === 'en' ? 'https://www.visimuseum.com/' : `https://www.visimuseum.com/?lang=${l}`;
+    // Mise à jour de l'URL dans la barre d'adresse (sans rechargement)
+    const newUrl = l === 'en' ? '/' : `/?lang=${l}`;
+    if (window.history && window.history.replaceState) {
+        window.history.replaceState({ lang: l }, '', newUrl);
+    }
     const metaTitle = document.querySelector('meta[property="og:title"]');
     if (metaTitle && i18n[l]?.subtitle) {
         const titles = { en: 'VisiMuseum — Find Your Next Museum', fr: 'VisiMuseum — Trouvez votre prochain musée', es: 'VisiMuseum — Encuentra tu próximo museo' };
@@ -2106,7 +2163,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize app
     initCountrySelect();
-    applyTranslations();
+    setLang(lang); // applique la langue détectée depuis l'URL (hreflang + canonical + traductions)
     searchMuseums();
 });
 </script>
