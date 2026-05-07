@@ -1028,6 +1028,163 @@
             .footer-inner { flex-direction: column; gap: 32px; padding: 36px 20px 28px; }
             .footer-nav { gap: 28px; }
         }
+
+        /* ====== TOP 10 RANKINGS SECTION ====== */
+        .rankings-section {
+            background: var(--navy-mid);
+            border-top: 1px solid rgba(201,168,76,0.15);
+            border-bottom: 1px solid rgba(201,168,76,0.15);
+            padding: 64px 30px;
+        }
+        .rankings-inner {
+            max-width: 1320px;
+            margin: 0 auto;
+        }
+        .rankings-header {
+            text-align: center;
+            margin-bottom: 52px;
+        }
+        .rankings-eyebrow {
+            font-size: 0.65rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 12px;
+            opacity: 0.85;
+        }
+        .rankings-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+            font-weight: 300;
+            color: var(--white);
+            letter-spacing: 0.06em;
+        }
+        .rankings-subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 1rem;
+            color: rgba(255,255,255,0.35);
+            margin-top: 10px;
+            letter-spacing: 0.04em;
+        }
+        .rankings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .ranking-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(201,168,76,0.14);
+            border-radius: 8px;
+            padding: 24px 22px 20px;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transition: all 0.28s cubic-bezier(0.34,1.2,0.64,1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .ranking-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .ranking-card:hover {
+            background: rgba(201,168,76,0.06);
+            border-color: rgba(201,168,76,0.35);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
+        .ranking-card:hover::before { opacity: 1; }
+        .ranking-card-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+        .ranking-icon {
+            font-size: 1.8rem;
+            line-height: 1;
+            flex-shrink: 0;
+            filter: drop-shadow(0 2px 6px rgba(201,168,76,0.3));
+        }
+        .ranking-card-info { flex: 1; min-width: 0; }
+        .ranking-card-label {
+            font-size: 0.6rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--gold);
+            opacity: 0.75;
+            margin-bottom: 5px;
+        }
+        .ranking-card-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.18rem;
+            font-weight: 400;
+            color: var(--white);
+            line-height: 1.25;
+        }
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .ranking-item {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            padding: 7px 10px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.025);
+            transition: background 0.2s;
+        }
+        .ranking-card:hover .ranking-item { background: rgba(201,168,76,0.04); }
+        .ranking-num {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.85rem;
+            color: var(--gold);
+            opacity: 0.6;
+            min-width: 20px;
+            text-align: right;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+        .ranking-name {
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.65);
+            line-height: 1.35;
+            flex: 1;
+        }
+        .ranking-city {
+            font-size: 0.65rem;
+            color: rgba(201,168,76,0.55);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .ranking-cta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--gold);
+            opacity: 0;
+            transition: opacity 0.2s;
+            margin-top: 4px;
+        }
+        .ranking-cta svg { width: 10px; height: 10px; }
+        .ranking-card:hover .ranking-cta { opacity: 0.8; }
+
+        @media (max-width: 768px) {
+            .rankings-section { padding: 44px 16px; }
+            .rankings-grid { grid-template-columns: 1fr; gap: 14px; }
+        }
     </style>
 </head>
 <body>
@@ -1069,7 +1226,7 @@
         </div>
         <div class="country-select-wrapper">
             <select id="countrySelect" aria-label="Filter by country">
-                <option value="">-- All Countries --</option>
+                <option value="" data-i18n="allCountries">-- All Countries --</option>
             </select>
         </div>
     </div>
@@ -1085,6 +1242,310 @@
         <button class="filter-btn free-btn" onclick="setFilter('free',this)" data-i18n="filterFree"></button>
     </div>
 </header>
+
+<!-- ============================================================ -->
+<!-- TOP 10 RANKINGS — Listes thématiques de musées             -->
+<!-- ============================================================ -->
+<section class="rankings-section" aria-label="Top 10 museum rankings">
+    <div class="rankings-inner">
+        <div class="rankings-header">
+            <p class="rankings-eyebrow" data-i18n="rankingsEyebrow">✦ Curated Lists</p>
+            <h2 class="rankings-title" data-i18n="rankingsTitle">The World's Top 10 Museums</h2>
+            <p class="rankings-subtitle" data-i18n="rankingsSubtitle">Our finest selections, from the monumental to the wonderfully strange</p>
+        </div>
+        <div class="rankings-grid">
+
+            <!-- 1. Les plus grands -->
+            <a class="ranking-card" href="?filter=largest" onclick="setFilter('all',document.querySelector('.filter-btn'));document.getElementById('citySearch').value='';searchMuseums();return false;">
+                <div class="ranking-card-top">
+                    <div class="ranking-icon">🏛️</div>
+                    <div class="ranking-card-info">
+                        <div class="ranking-card-label">Top 10</div>
+                        <div class="ranking-card-title" data-i18n="rank01Title">Largest Museums in the World</div>
+                    </div>
+                </div>
+                <div class="ranking-list">
+                    <div class="ranking-item"><span class="ranking-num">01</span><span class="ranking-name">The Louvre</span><span class="ranking-city">Paris</span></div>
+                    <div class="ranking-item"><span class="ranking-num">02</span><span class="ranking-name">State Hermitage Museum</span><span class="ranking-city">St Petersburg</span></div>
+                    <div class="ranking-item"><span class="ranking-num">03</span><span class="ranking-name">National Museum of China</span><span class="ranking-city">Beijing</span></div>
+                    <div class="ranking-item"><span class="ranking-num">04</span><span class="ranking-name">Vatican Museums</span><span class="ranking-city">Rome</span></div>
+                    <div class="ranking-item"><span class="ranking-num">05</span><span class="ranking-name">Metropolitan Museum of Art</span><span class="ranking-city">New York</span></div>
+                    <div class="ranking-item"><span class="ranking-num">06</span><span class="ranking-name">National Museum of Natural History</span><span class="ranking-city">Washington DC</span></div>
+                    <div class="ranking-item"><span class="ranking-num">07</span><span class="ranking-name">British Museum</span><span class="ranking-city">London</span></div>
+                    <div class="ranking-item"><span class="ranking-num">08</span><span class="ranking-name">Rijksmuseum</span><span class="ranking-city">Amsterdam</span></div>
+                    <div class="ranking-item"><span class="ranking-num">09</span><span class="ranking-name">National Palace Museum</span><span class="ranking-city">Taipei</span></div>
+                    <div class="ranking-item"><span class="ranking-num">10</span><span class="ranking-name">Museo Nacional del Prado</span><span class="ranking-city">Madrid</span></div>
+                </div>
+                <div class="ranking-cta"><span data-i18n="rankingExplore">Explore</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
+            </a>
+
+            <!-- 2. Les plus visités -->
+            <a class="ranking-card" href="#" onclick="return false;">
+                <div class="ranking-card-top">
+                    <div class="ranking-icon">🌍</div>
+                    <div class="ranking-card-info">
+                        <div class="ranking-card-label">Top 10</div>
+                        <div class="ranking-card-title" data-i18n="rank02Title">Most Visited Museums in the World</div>
+                    </div>
+                </div>
+                <div class="ranking-list">
+                    <div class="ranking-item"><span class="ranking-num">01</span><span class="ranking-name">The Louvre</span><span class="ranking-city">Paris</span></div>
+                    <div class="ranking-item"><span class="ranking-num">02</span><span class="ranking-name">National Museum of China</span><span class="ranking-city">Beijing</span></div>
+                    <div class="ranking-item"><span class="ranking-num">03</span><span class="ranking-name">Vatican Museums</span><span class="ranking-city">Rome</span></div>
+                    <div class="ranking-item"><span class="ranking-num">04</span><span class="ranking-name">Metropolitan Museum of Art</span><span class="ranking-city">New York</span></div>
+                    <div class="ranking-item"><span class="ranking-num">05</span><span class="ranking-name">British Museum</span><span class="ranking-city">London</span></div>
+                    <div class="ranking-item"><span class="ranking-num">06</span><span class="ranking-name">Tate Modern</span><span class="ranking-city">London</span></div>
+                    <div class="ranking-item"><span class="ranking-num">07</span><span class="ranking-name">National Gallery</span><span class="ranking-city">London</span></div>
+                    <div class="ranking-item"><span class="ranking-num">08</span><span class="ranking-name">Natural History Museum</span><span class="ranking-city">London</span></div>
+                    <div class="ranking-item"><span class="ranking-num">09</span><span class="ranking-name">American Museum of Natural History</span><span class="ranking-city">New York</span></div>
+                    <div class="ranking-item"><span class="ranking-num">10</span><span class="ranking-name">Smithsonian National Air and Space</span><span class="ranking-city">Washington DC</span></div>
+                </div>
+                <div class="ranking-cta"><span data-i18n="rankingExplore">Explore</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
+            </a>
+
+            <!-- 3. Les plus insolites -->
+            <a class="ranking-card" href="#" onclick="setFilter('Unusual',document.querySelector('.unusual-btn'));return false;" style="border-color:rgba(196,168,232,0.2)">
+                <div class="ranking-card-top">
+                    <div class="ranking-icon">🔮</div>
+                    <div class="ranking-card-info">
+                        <div class="ranking-card-label">Top 10</div>
+                        <div class="ranking-card-title" data-i18n="rank03Title">Most Unusual Museums in the World</div>
+                    </div>
+                </div>
+                <div class="ranking-list">
+                    <div class="ranking-item"><span class="ranking-num">01</span><span class="ranking-name">Museum of Broken Relationships</span><span class="ranking-city">Zagreb</span></div>
+                    <div class="ranking-item"><span class="ranking-num">02</span><span class="ranking-name">Sulabh International Museum of Toilets</span><span class="ranking-city">New Delhi</span></div>
+                    <div class="ranking-item"><span class="ranking-num">03</span><span class="ranking-name">Icelandic Phallological Museum</span><span class="ranking-city">Reykjavik</span></div>
+                    <div class="ranking-item"><span class="ranking-num">04</span><span class="ranking-name">Museum of Bad Art</span><span class="ranking-city">Boston</span></div>
+                    <div class="ranking-item"><span class="ranking-num">05</span><span class="ranking-name">Currywurst Museum</span><span class="ranking-city">Berlin</span></div>
+                    <div class="ranking-item"><span class="ranking-num">06</span><span class="ranking-name">Paris Sewer Museum</span><span class="ranking-city">Paris</span></div>
+                    <div class="ranking-item"><span class="ranking-num">07</span><span class="ranking-name">Museum of Failure</span><span class="ranking-city">Los Angeles</span></div>
+                    <div class="ranking-item"><span class="ranking-num">08</span><span class="ranking-name">Mütter Museum</span><span class="ranking-city">Philadelphia</span></div>
+                    <div class="ranking-item"><span class="ranking-num">09</span><span class="ranking-name">International Spy Museum</span><span class="ranking-city">Washington DC</span></div>
+                    <div class="ranking-item"><span class="ranking-num">10</span><span class="ranking-name">Museum of Witchcraft and Magic</span><span class="ranking-city">Boscastle</span></div>
+                </div>
+                <div class="ranking-cta" style="color:var(--unusual-light)"><span data-i18n="rankingExplore">Explore</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
+            </a>
+
+            <!-- 4. Les plus petits -->
+            <a class="ranking-card" href="#" onclick="return false;">
+                <div class="ranking-card-top">
+                    <div class="ranking-icon">🔬</div>
+                    <div class="ranking-card-info">
+                        <div class="ranking-card-label">Top 10</div>
+                        <div class="ranking-card-title" data-i18n="rank04Title">Smallest Museums in the World</div>
+                    </div>
+                </div>
+                <div class="ranking-list">
+                    <div class="ranking-item"><span class="ranking-num">01</span><span class="ranking-name">The Smallest Museum (1 m²)</span><span class="ranking-city">Cologne</span></div>
+                    <div class="ranking-item"><span class="ranking-num">02</span><span class="ranking-name">Musée de la Mine de Cap Garonne</span><span class="ranking-city">Le Pradet</span></div>
+                    <div class="ranking-item"><span class="ranking-num">03</span><span class="ranking-name">Museum of Jurassic Technology</span><span class="ranking-city">Los Angeles</span></div>
+                    <div class="ranking-item"><span class="ranking-num">04</span><span class="ranking-name">Lundy Island Museum</span><span class="ranking-city">Bristol Channel</span></div>
+                    <div class="ranking-item"><span class="ranking-num">05</span><span class="ranking-name">Museum of Miniature Books</span><span class="ranking-city">Baku</span></div>
+                    <div class="ranking-item"><span class="ranking-num">06</span><span class="ranking-name">Nut Museum</span><span class="ranking-city">Old Lyme, CT</span></div>
+                    <div class="ranking-item"><span class="ranking-num">07</span><span class="ranking-name">Burlingame Museum of PEZ</span><span class="ranking-city">San Francisco</span></div>
+                    <div class="ranking-item"><span class="ranking-num">08</span><span class="ranking-name">Museum of the History of Science</span><span class="ranking-city">Geneva</span></div>
+                    <div class="ranking-item"><span class="ranking-num">09</span><span class="ranking-name">Paris Miniature Museum</span><span class="ranking-city">Paris</span></div>
+                    <div class="ranking-item"><span class="ranking-num">10</span><span class="ranking-name">Fitzwilliam Museum – Coin Room</span><span class="ranking-city">Cambridge</span></div>
+                </div>
+                <div class="ranking-cta"><span data-i18n="rankingExplore">Explore</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
+            </a>
+
+            <!-- 5. Musées gratuits -->
+            <a class="ranking-card" href="#" onclick="setFilter('free',document.querySelector('.free-btn'));return false;" style="border-color:rgba(5,150,105,0.2)">
+                <div class="ranking-card-top">
+                    <div class="ranking-icon">🎟️</div>
+                    <div class="ranking-card-info">
+                        <div class="ranking-card-label">Top 10</div>
+                        <div class="ranking-card-title" data-i18n="rank05Title">Best Free Museums in the World</div>
+                    </div>
+                </div>
+                <div class="ranking-list">
+                    <div class="ranking-item"><span class="ranking-num">01</span><span class="ranking-name">British Museum</span><span class="ranking-city">London</span></div>
+                    <div class="ranking-item"><span class="ranking-num">02</span><span class="ranking-name">National Gallery</span><span class="ranking-city">London</span></div>
+                    <div class="ranking-item"><span class="ranking-num">03</span><span class="ranking-name">Smithsonian Museums (19 museums)</span><span class="ranking-city">Washington DC</span></div>
+                    <div class="ranking-item"><span class="ranking-num">04</span><span class="ranking-name">Tate Modern</span><span class="ranking-city">London</span></div>
+                    <div class="ranking-item"><span class="ranking-num">05</span><span class="ranking-name">Musée d'Art Moderne de la Ville</span><span class="ranking-city">Paris</span></div>
+                    <div class="ranking-item"><span class="ranking-num">06</span><span class="ranking-name">Neue Nationalgalerie</span><span class="ranking-city">Berlin</span></div>
+                    <div class="ranking-item"><span class="ranking-num">07</span><span class="ranking-name">Museo Reina Sofía (free hours)</span><span class="ranking-city">Madrid</span></div>
+                    <div class="ranking-item"><span class="ranking-num">08</span><span class="ranking-name">Scottish National Gallery</span><span class="ranking-city">Edinburgh</span></div>
+                    <div class="ranking-item"><span class="ranking-num">09</span><span class="ranking-name">Rijksmuseum (free Fri evenings)</span><span class="ranking-city">Amsterdam</span></div>
+                    <div class="ranking-item"><span class="ranking-num">10</span><span class="ranking-name">National Museum of Natural History</span><span class="ranking-city">Washington DC</span></div>
+                </div>
+                <div class="ranking-cta" style="color:#10b981"><span data-i18n="rankingExplore">Explore</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
+            </a>
+
+            <!-- 6. Musées d'art les plus iconiques -->
+            <a class="ranking-card" href="#" onclick="setFilter('Art',document.querySelector('[onclick*=Art]'));return false;">
+                <div class="ranking-card-top">
+                    <div class="ranking-icon">🎨</div>
+                    <div class="ranking-card-info">
+                        <div class="ranking-card-label">Top 10</div>
+                        <div class="ranking-card-title" data-i18n="rank06Title">Most Iconic Art Museums</div>
+                    </div>
+                </div>
+                <div class="ranking-list">
+                    <div class="ranking-item"><span class="ranking-num">01</span><span class="ranking-name">The Louvre</span><span class="ranking-city">Paris</span></div>
+                    <div class="ranking-item"><span class="ranking-num">02</span><span class="ranking-name">MoMA</span><span class="ranking-city">New York</span></div>
+                    <div class="ranking-item"><span class="ranking-num">03</span><span class="ranking-name">Uffizi Gallery</span><span class="ranking-city">Florence</span></div>
+                    <div class="ranking-item"><span class="ranking-num">04</span><span class="ranking-name">Guggenheim Museum</span><span class="ranking-city">New York</span></div>
+                    <div class="ranking-item"><span class="ranking-num">05</span><span class="ranking-name">Musée d'Orsay</span><span class="ranking-city">Paris</span></div>
+                    <div class="ranking-item"><span class="ranking-num">06</span><span class="ranking-name">Rijksmuseum</span><span class="ranking-city">Amsterdam</span></div>
+                    <div class="ranking-item"><span class="ranking-num">07</span><span class="ranking-name">Tate Modern</span><span class="ranking-city">London</span></div>
+                    <div class="ranking-item"><span class="ranking-num">08</span><span class="ranking-name">Museo del Prado</span><span class="ranking-city">Madrid</span></div>
+                    <div class="ranking-item"><span class="ranking-num">09</span><span class="ranking-name">Centre Pompidou</span><span class="ranking-city">Paris</span></div>
+                    <div class="ranking-item"><span class="ranking-num">10</span><span class="ranking-name">Van Gogh Museum</span><span class="ranking-city">Amsterdam</span></div>
+                </div>
+                <div class="ranking-cta"><span data-i18n="rankingExplore">Explore</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
+            </a>
+
+            <!-- 7. Musées de sciences -->
+            <a class="ranking-card" href="#" onclick="setFilter('Science',document.querySelector('[onclick*=Science]'));return false;">
+                <div class="ranking-card-top">
+                    <div class="ranking-icon">🔭</div>
+                    <div class="ranking-card-info">
+                        <div class="ranking-card-label">Top 10</div>
+                        <div class="ranking-card-title" data-i18n="rank07Title">Best Science Museums</div>
+                    </div>
+                </div>
+                <div class="ranking-list">
+                    <div class="ranking-item"><span class="ranking-num">01</span><span class="ranking-name">Science Museum</span><span class="ranking-city">London</span></div>
+                    <div class="ranking-item"><span class="ranking-num">02</span><span class="ranking-name">Deutsches Museum</span><span class="ranking-city">Munich</span></div>
+                    <div class="ranking-item"><span class="ranking-num">03</span><span class="ranking-name">Exploratorium</span><span class="ranking-city">San Francisco</span></div>
+                    <div class="ranking-item"><span class="ranking-num">04</span><span class="ranking-name">Cité des Sciences et de l'Industrie</span><span class="ranking-city">Paris</span></div>
+                    <div class="ranking-item"><span class="ranking-num">05</span><span class="ranking-name">California Academy of Sciences</span><span class="ranking-city">San Francisco</span></div>
+                    <div class="ranking-item"><span class="ranking-num">06</span><span class="ranking-name">Natural History Museum</span><span class="ranking-city">London</span></div>
+                    <div class="ranking-item"><span class="ranking-num">07</span><span class="ranking-name">Field Museum</span><span class="ranking-city">Chicago</span></div>
+                    <div class="ranking-item"><span class="ranking-num">08</span><span class="ranking-name">Palais de la Découverte</span><span class="ranking-city">Paris</span></div>
+                    <div class="ranking-item"><span class="ranking-num">09</span><span class="ranking-name">Kennedy Space Center</span><span class="ranking-city">Cape Canaveral</span></div>
+                    <div class="ranking-item"><span class="ranking-num">10</span><span class="ranking-name">Ontario Science Centre</span><span class="ranking-city">Toronto</span></div>
+                </div>
+                <div class="ranking-cta"><span data-i18n="rankingExplore">Explore</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
+            </a>
+
+            <!-- 8. Plus vieux / historiques -->
+            <a class="ranking-card" href="#" onclick="setFilter('History',document.querySelector('[onclick*=History]'));return false;">
+                <div class="ranking-card-top">
+                    <div class="ranking-icon">📜</div>
+                    <div class="ranking-card-info">
+                        <div class="ranking-card-label">Top 10</div>
+                        <div class="ranking-card-title" data-i18n="rank08Title">Oldest Museums in the World</div>
+                    </div>
+                </div>
+                <div class="ranking-list">
+                    <div class="ranking-item"><span class="ranking-num">01</span><span class="ranking-name">Capitoline Museums (1471)</span><span class="ranking-city">Rome</span></div>
+                    <div class="ranking-item"><span class="ranking-num">02</span><span class="ranking-name">Vatican Museums (1506)</span><span class="ranking-city">Rome</span></div>
+                    <div class="ranking-item"><span class="ranking-num">03</span><span class="ranking-name">Uffizi Gallery (1581)</span><span class="ranking-city">Florence</span></div>
+                    <div class="ranking-item"><span class="ranking-num">04</span><span class="ranking-name">Kunstkamera (1714)</span><span class="ranking-city">St Petersburg</span></div>
+                    <div class="ranking-item"><span class="ranking-num">05</span><span class="ranking-name">British Museum (1753)</span><span class="ranking-city">London</span></div>
+                    <div class="ranking-item"><span class="ranking-num">06</span><span class="ranking-name">Ashmolean Museum (1683)</span><span class="ranking-city">Oxford</span></div>
+                    <div class="ranking-item"><span class="ranking-num">07</span><span class="ranking-name">Museo Nacional del Prado (1819)</span><span class="ranking-city">Madrid</span></div>
+                    <div class="ranking-item"><span class="ranking-num">08</span><span class="ranking-name">Louvre Museum (1793)</span><span class="ranking-city">Paris</span></div>
+                    <div class="ranking-item"><span class="ranking-num">09</span><span class="ranking-name">State Hermitage Museum (1764)</span><span class="ranking-city">St Petersburg</span></div>
+                    <div class="ranking-item"><span class="ranking-num">10</span><span class="ranking-name">Peabody Essex Museum (1799)</span><span class="ranking-city">Salem</span></div>
+                </div>
+                <div class="ranking-cta"><span data-i18n="rankingExplore">Explore</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
+            </a>
+
+            <!-- 9. Architecturalement remarquables -->
+            <a class="ranking-card" href="#" onclick="return false;">
+                <div class="ranking-card-top">
+                    <div class="ranking-icon">🏗️</div>
+                    <div class="ranking-card-info">
+                        <div class="ranking-card-label">Top 10</div>
+                        <div class="ranking-card-title" data-i18n="rank09Title">Most Spectacular Museum Buildings</div>
+                    </div>
+                </div>
+                <div class="ranking-list">
+                    <div class="ranking-item"><span class="ranking-num">01</span><span class="ranking-name">Guggenheim Bilbao</span><span class="ranking-city">Bilbao</span></div>
+                    <div class="ranking-item"><span class="ranking-num">02</span><span class="ranking-name">Grand Egyptian Museum</span><span class="ranking-city">Giza</span></div>
+                    <div class="ranking-item"><span class="ranking-num">03</span><span class="ranking-name">Denver Art Museum</span><span class="ranking-city">Denver</span></div>
+                    <div class="ranking-item"><span class="ranking-num">04</span><span class="ranking-name">National Museum of Qatar</span><span class="ranking-city">Doha</span></div>
+                    <div class="ranking-item"><span class="ranking-num">05</span><span class="ranking-name">MAXXI Museum</span><span class="ranking-city">Rome</span></div>
+                    <div class="ranking-item"><span class="ranking-num">06</span><span class="ranking-name">Centre Pompidou</span><span class="ranking-city">Paris</span></div>
+                    <div class="ranking-item"><span class="ranking-num">07</span><span class="ranking-name">Jewish Museum Berlin</span><span class="ranking-city">Berlin</span></div>
+                    <div class="ranking-item"><span class="ranking-num">08</span><span class="ranking-name">Louvre Abu Dhabi</span><span class="ranking-city">Abu Dhabi</span></div>
+                    <div class="ranking-item"><span class="ranking-num">09</span><span class="ranking-name">Musée du quai Branly</span><span class="ranking-city">Paris</span></div>
+                    <div class="ranking-item"><span class="ranking-num">10</span><span class="ranking-name">National Museum of African American History</span><span class="ranking-city">Washington DC</span></div>
+                </div>
+                <div class="ranking-cta"><span data-i18n="rankingExplore">Explore</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
+            </a>
+
+            <!-- 10. Les meilleurs pour enfants -->
+            <a class="ranking-card" href="#" onclick="return false;">
+                <div class="ranking-card-top">
+                    <div class="ranking-icon">🧸</div>
+                    <div class="ranking-card-info">
+                        <div class="ranking-card-label">Top 10</div>
+                        <div class="ranking-card-title" data-i18n="rank10Title">Best Museums for Children</div>
+                    </div>
+                </div>
+                <div class="ranking-list">
+                    <div class="ranking-item"><span class="ranking-num">01</span><span class="ranking-name">Children's Museum of Indianapolis</span><span class="ranking-city">Indianapolis</span></div>
+                    <div class="ranking-item"><span class="ranking-num">02</span><span class="ranking-name">Cité des Enfants</span><span class="ranking-city">Paris</span></div>
+                    <div class="ranking-item"><span class="ranking-num">03</span><span class="ranking-name">Exploratorium</span><span class="ranking-city">San Francisco</span></div>
+                    <div class="ranking-item"><span class="ranking-num">04</span><span class="ranking-name">Natural History Museum</span><span class="ranking-city">London</span></div>
+                    <div class="ranking-item"><span class="ranking-num">05</span><span class="ranking-name">Please Touch Museum</span><span class="ranking-city">Philadelphia</span></div>
+                    <div class="ranking-item"><span class="ranking-num">06</span><span class="ranking-name">Musée des Arts et Métiers</span><span class="ranking-city">Paris</span></div>
+                    <div class="ranking-item"><span class="ranking-num">07</span><span class="ranking-name">Kennedy Space Center</span><span class="ranking-city">Cape Canaveral</span></div>
+                    <div class="ranking-item"><span class="ranking-num">08</span><span class="ranking-name">Deutsches Hygiene Museum</span><span class="ranking-city">Dresden</span></div>
+                    <div class="ranking-item"><span class="ranking-num">09</span><span class="ranking-name">MoPOP</span><span class="ranking-city">Seattle</span></div>
+                    <div class="ranking-item"><span class="ranking-num">10</span><span class="ranking-name">Kindermuseum Frankfurt</span><span class="ranking-city">Frankfurt</span></div>
+                </div>
+                <div class="ranking-cta"><span data-i18n="rankingExplore">Explore</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
+            </a>
+
+            <!-- 11. Musées cachés / secrets -->
+            <a class="ranking-card" href="#" onclick="setFilter('Unusual',document.querySelector('.unusual-btn'));return false;" style="border-color:rgba(196,168,232,0.2)">
+                <div class="ranking-card-top">
+                    <div class="ranking-icon">🗝️</div>
+                    <div class="ranking-card-info">
+                        <div class="ranking-card-label">Top 10</div>
+                        <div class="ranking-card-title" data-i18n="rank11Title">Best Hidden &amp; Secret Museums</div>
+                    </div>
+                </div>
+                <div class="ranking-list">
+                    <div class="ranking-item"><span class="ranking-num">01</span><span class="ranking-name">The Museum of Innocence</span><span class="ranking-city">Istanbul</span></div>
+                    <div class="ranking-item"><span class="ranking-num">02</span><span class="ranking-name">The Vaults (underground)</span><span class="ranking-city">London</span></div>
+                    <div class="ranking-item"><span class="ranking-num">03</span><span class="ranking-name">Catacombs Museum</span><span class="ranking-city">Paris</span></div>
+                    <div class="ranking-item"><span class="ranking-num">04</span><span class="ranking-name">City of the Dead</span><span class="ranking-city">Cairo</span></div>
+                    <div class="ranking-item"><span class="ranking-num">05</span><span class="ranking-name">Museum of Secrets</span><span class="ranking-city">Vienna</span></div>
+                    <div class="ranking-item"><span class="ranking-num">06</span><span class="ranking-name">International Spy Museum</span><span class="ranking-city">Washington DC</span></div>
+                    <div class="ranking-item"><span class="ranking-num">07</span><span class="ranking-name">Torture Museum</span><span class="ranking-city">Amsterdam</span></div>
+                    <div class="ranking-item"><span class="ranking-num">08</span><span class="ranking-name">Black Country Living Museum</span><span class="ranking-city">Dudley</span></div>
+                    <div class="ranking-item"><span class="ranking-num">09</span><span class="ranking-name">Museum of Death</span><span class="ranking-city">Los Angeles</span></div>
+                    <div class="ranking-item"><span class="ranking-num">10</span><span class="ranking-name">Kabinett der Kuriositäten</span><span class="ranking-city">Vienna</span></div>
+                </div>
+                <div class="ranking-cta" style="color:var(--unusual-light)"><span data-i18n="rankingExplore">Explore</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
+            </a>
+
+            <!-- 12. Nature & biodiversité -->
+            <a class="ranking-card" href="#" onclick="setFilter('Nature',document.querySelector('[onclick*=Nature]'));return false;">
+                <div class="ranking-card-top">
+                    <div class="ranking-icon">🦕</div>
+                    <div class="ranking-card-info">
+                        <div class="ranking-card-label">Top 10</div>
+                        <div class="ranking-card-title" data-i18n="rank12Title">Best Natural History Museums</div>
+                    </div>
+                </div>
+                <div class="ranking-list">
+                    <div class="ranking-item"><span class="ranking-num">01</span><span class="ranking-name">Natural History Museum</span><span class="ranking-city">London</span></div>
+                    <div class="ranking-item"><span class="ranking-num">02</span><span class="ranking-name">American Museum of Natural History</span><span class="ranking-city">New York</span></div>
+                    <div class="ranking-item"><span class="ranking-num">03</span><span class="ranking-name">National Museum of Natural History</span><span class="ranking-city">Washington DC</span></div>
+                    <div class="ranking-item"><span class="ranking-num">04</span><span class="ranking-name">Museum für Naturkunde</span><span class="ranking-city">Berlin</span></div>
+                    <div class="ranking-item"><span class="ranking-num">05</span><span class="ranking-name">Muséum National d'Histoire Naturelle</span><span class="ranking-city">Paris</span></div>
+                    <div class="ranking-item"><span class="ranking-num">06</span><span class="ranking-name">Field Museum</span><span class="ranking-city">Chicago</span></div>
+                    <div class="ranking-item"><span class="ranking-num">07</span><span class="ranking-name">California Academy of Sciences</span><span class="ranking-city">San Francisco</span></div>
+                    <div class="ranking-item"><span class="ranking-num">08</span><span class="ranking-name">Australian Museum</span><span class="ranking-city">Sydney</span></div>
+                    <div class="ranking-item"><span class="ranking-num">09</span><span class="ranking-name">Royal Ontario Museum</span><span class="ranking-city">Toronto</span></div>
+                    <div class="ranking-item"><span class="ranking-num">10</span><span class="ranking-name">Carnegie Museum of Natural History</span><span class="ranking-city">Pittsburgh</span></div>
+                </div>
+                <div class="ranking-cta"><span data-i18n="rankingExplore">Explore</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
+            </a>
+
+        </div>
+    </div>
+</section>
 
 <div class="stats-bar">
     <div class="stats-info">
@@ -1113,6 +1574,7 @@
     </div>
     <div class="results" id="resultsGrid" aria-live="polite" aria-label="Museums list"></div>
 </main>
+
 
 <div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
 <div class="detail-panel" id="detailPanel" style="display:none">
@@ -1225,7 +1687,24 @@ const i18n = {
         // Tips
         tip1: "Arrive early to avoid crowds, especially on weekends and holidays",
         tip2: "Plan 2-3 hours for a comprehensive visit and full appreciation of the collections",
-        tip3: "Check photography policies before taking pictures in exhibitions"
+        tip3: "Check photography policies before taking pictures in exhibitions",
+        // Rankings section
+        rankingsEyebrow: "✦ Curated Lists",
+        rankingsTitle: "The World's Top 10 Museums",
+        rankingsSubtitle: "Our finest selections, from the monumental to the wonderfully strange",
+        rankingExplore: "Explore",
+        rank01Title: "Largest Museums in the World",
+        rank02Title: "Most Visited Museums in the World",
+        rank03Title: "Most Unusual Museums in the World",
+        rank04Title: "Smallest Museums in the World",
+        rank05Title: "Best Free Museums in the World",
+        rank06Title: "Most Iconic Art Museums",
+        rank07Title: "Best Science Museums",
+        rank08Title: "Oldest Museums in the World",
+        rank09Title: "Most Spectacular Museum Buildings",
+        rank10Title: "Best Museums for Children",
+        rank11Title: "Best Hidden & Secret Museums",
+        rank12Title: "Best Natural History Museums"
     },
     fr: {
         shareTitle: "Partager ce musee",
@@ -1273,7 +1752,24 @@ const i18n = {
         // Tips
         tip1: "Arrivez tot pour eviter la foule, surtout les week-ends et jours feries",
         tip2: "Prevoyez 2-3 heures pour une visite complete et apprecier pleinement les collections",
-        tip3: "Verifiez les regles de photographie avant de prendre des photos dans les expositions"
+        tip3: "Verifiez les regles de photographie avant de prendre des photos dans les expositions",
+        // Rankings section
+        rankingsEyebrow: "✦ Sélections",
+        rankingsTitle: "Les 10 Plus Grands Musées du Monde",
+        rankingsSubtitle: "Nos meilleures sélections, du monumental à l'insolite",
+        rankingExplore: "Explorer",
+        rank01Title: "Les Plus Grands Musées du Monde",
+        rank02Title: "Les Musées les Plus Visités",
+        rank03Title: "Les Musées les Plus Insolites",
+        rank04Title: "Les Plus Petits Musées du Monde",
+        rank05Title: "Les Meilleurs Musées Gratuits",
+        rank06Title: "Les Musées d'Art les Plus Iconiques",
+        rank07Title: "Les Meilleurs Musées Scientifiques",
+        rank08Title: "Les Plus Vieux Musées du Monde",
+        rank09Title: "Les Bâtiments de Musées les Plus Spectaculaires",
+        rank10Title: "Les Meilleurs Musées pour Enfants",
+        rank11Title: "Les Meilleurs Musées Cachés & Secrets",
+        rank12Title: "Les Meilleurs Musées d'Histoire Naturelle"
     },
     es: {
         shareTitle: "Compartir este museo",
@@ -1321,7 +1817,24 @@ const i18n = {
         // Tips
         tip1: "Llegue temprano para evitar multitudes, especialmente los fines de semana y festivos",
         tip2: "Planifique 2-3 horas para una visita completa y apreciacion total de las colecciones",
-        tip3: "Verifique las politicas de fotografia antes de tomar fotos en las exposiciones"
+        tip3: "Verifique las politicas de fotografia antes de tomar fotos en las exposiciones",
+        // Rankings section
+        rankingsEyebrow: "✦ Selecciones",
+        rankingsTitle: "Los 10 Mejores Museos del Mundo",
+        rankingsSubtitle: "Nuestras mejores selecciones, de lo monumental a lo insólito",
+        rankingExplore: "Explorar",
+        rank01Title: "Los Museos Más Grandes del Mundo",
+        rank02Title: "Los Museos Más Visitados del Mundo",
+        rank03Title: "Los Museos Más Insólitos del Mundo",
+        rank04Title: "Los Museos Más Pequeños del Mundo",
+        rank05Title: "Los Mejores Museos Gratuitos",
+        rank06Title: "Los Museos de Arte Más Icónicos",
+        rank07Title: "Los Mejores Museos de Ciencias",
+        rank08Title: "Los Museos Más Antiguos del Mundo",
+        rank09Title: "Los Edificios de Museos Más Espectaculares",
+        rank10Title: "Los Mejores Museos para Niños",
+        rank11Title: "Los Mejores Museos Ocultos y Secretos",
+        rank12Title: "Los Mejores Museos de Historia Natural"
     }
 };
 
@@ -1394,9 +1907,11 @@ function setLang(l) {
     if (canonical) canonical.href = l === 'en' ? 'https://www.visimuseum.com/' : `https://www.visimuseum.com/?lang=${l}`;
     // Mise à jour de l'URL dans la barre d'adresse (sans rechargement)
     const newUrl = l === 'en' ? '/' : `/?lang=${l}`;
-    if (window.history && window.history.replaceState) {
-        window.history.replaceState({ lang: l }, '', newUrl);
-    }
+    try {
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState({ lang: l }, '', newUrl);
+        }
+    } catch (e) { /* srcdoc iframe — replaceState not allowed */ }
     const metaTitle = document.querySelector('meta[property="og:title"]');
     if (metaTitle && i18n[l]?.subtitle) {
         const titles = { en: 'VisiMuseum — Find Your Next Museum', fr: 'VisiMuseum — Trouvez votre prochain musée', es: 'VisiMuseum — Encuentra tu próximo museo' };
@@ -1877,7 +2392,20 @@ function searchMuseums() {
     const grid = document.getElementById('resultsGrid');
     const sectionTitle = document.getElementById('sectionTitle');
     const statsText = document.getElementById('statsText');
+    const statsBar = document.querySelector('.stats-bar');
+    const rankingsSection = document.querySelector('.rankings-section');
+    const mainEl = document.querySelector('main');
     grid.innerHTML = '';
+
+    // Détermine si une recherche est active
+    const isSearchActive = input !== '' || currentCountry !== '' || currentFilter !== 'all';
+
+    // Affiche/cache les sections selon l'état
+    if (rankingsSection) rankingsSection.style.display = isSearchActive ? 'none' : '';
+    if (mainEl) mainEl.style.display = isSearchActive ? '' : 'none';
+    if (statsBar) statsBar.style.display = isSearchActive ? '' : 'none';
+
+    if (!isSearchActive) return;
 
     let filtered = museums;
 
