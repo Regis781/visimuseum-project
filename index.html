@@ -104,10 +104,40 @@
       "name": "VisiMuseum",
       "url": "https://www.visimuseum.com/",
       "description": "A comprehensive guide to the world's greatest museums.",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.visimuseum.com/logo.png",
+        "width": 200,
+        "height": 60
+      },
       "sameAs": [
         "https://twitter.com/visimuseum",
         "https://www.facebook.com/visimuseum"
       ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "name": "VisiMuseum — World's Greatest Museums Directory",
+      "url": "https://www.visimuseum.com/",
+      "description": "Discover 200+ museums worldwide. Filter by art, history, science, nature. Free and paid entry.",
+      "inLanguage": ["en", "fr", "es"],
+      "about": {
+        "@type": "Thing",
+        "name": "Museums"
+      },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [{
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://www.visimuseum.com/"
+        }]
+      }
     }
     </script>
 
@@ -147,7 +177,8 @@
     <!-- ============================================================ -->
     <!-- FAVICON & APP ICONS                                           -->
     <!-- ============================================================ -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%2307111c'/><text y='72' x='12' font-size='65' font-family='serif'>🏛</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='12' fill='%2307111c'/%3E%3Cg fill='none' stroke='%23C9A84C' stroke-width='3'%3E%3Crect x='18' y='28' width='64' height='48' rx='2'/%3E%3Cline x1='18' y1='42' x2='82' y2='42'/%3E%3Cline x1='32' y1='28' x2='32' y2='42'/%3E%3Cline x1='50' y1='28' x2='50' y2='22'/%3E%3Cline x1='40' y1='22' x2='60' y2='22'/%3E%3C/g%3E%3Ctext y='68' x='50' font-size='10' font-family='Georgia,serif' fill='%23C9A84C' text-anchor='middle' letter-spacing='1'%3EVISI%3C/text%3E%3C/svg%3E">
+    <link rel="icon" sizes="32x32" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='12' fill='%2307111c'/%3E%3Cg fill='none' stroke='%23C9A84C' stroke-width='3'%3E%3Crect x='18' y='28' width='64' height='48' rx='2'/%3E%3Cline x1='18' y1='42' x2='82' y2='42'/%3E%3Cline x1='32' y1='28' x2='32' y2='42'/%3E%3Cline x1='50' y1='28' x2='50' y2='22'/%3E%3Cline x1='40' y1='22' x2='60' y2='22'/%3E%3C/g%3E%3Ctext y='68' x='50' font-size='10' font-family='Georgia,serif' fill='%23C9A84C' text-anchor='middle' letter-spacing='1'%3EVISI%3C/text%3E%3C/svg%3E">
     <link rel="apple-touch-icon" href="https://www.visimuseum.com/apple-touch-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -525,6 +556,24 @@
             border-radius: 50%;
             flex-shrink: 0;
         }
+
+        .back-top10-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border: 1px solid rgba(201,168,76,0.4);
+            border-radius: 20px;
+            background: rgba(201,168,76,0.08);
+            color: var(--gold);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.73rem;
+            letter-spacing: 0.07em;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+        .back-top10-btn:hover { background: rgba(201,168,76,0.18); border-color: var(--gold); }
 
         .view-toggle { display: flex; gap: 4px; }
         .view-btn {
@@ -1552,6 +1601,10 @@
         <span id="statsText"></span>
         <span class="stats-free-count" id="statsFree"></span>
     </div>
+    <button id="backTop10Btn" onclick="backToTop10()" style="display:none" class="back-top10-btn" aria-label="Back to Top 10">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        <span data-i18n="backTop10">Top 10</span>
+    </button>
     <div class="view-toggle">
         <button class="view-btn active" onclick="setView('grid',this)" title="Grid view" aria-label="Grid view">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1704,7 +1757,8 @@ const i18n = {
         rank09Title: "Most Spectacular Museum Buildings",
         rank10Title: "Best Museums for Children",
         rank11Title: "Best Hidden & Secret Museums",
-        rank12Title: "Best Natural History Museums"
+        rank12Title: "Best Natural History Museums",
+        backTop10: "← Top 10"
     },
     fr: {
         shareTitle: "Partager ce musee",
@@ -1769,7 +1823,8 @@ const i18n = {
         rank09Title: "Les Bâtiments de Musées les Plus Spectaculaires",
         rank10Title: "Les Meilleurs Musées pour Enfants",
         rank11Title: "Les Meilleurs Musées Cachés & Secrets",
-        rank12Title: "Les Meilleurs Musées d'Histoire Naturelle"
+        rank12Title: "Les Meilleurs Musées d'Histoire Naturelle",
+        backTop10: "← Top 10"
     },
     es: {
         shareTitle: "Compartir este museo",
@@ -1834,18 +1889,25 @@ const i18n = {
         rank09Title: "Los Edificios de Museos Más Espectaculares",
         rank10Title: "Los Mejores Museos para Niños",
         rank11Title: "Los Mejores Museos Ocultos y Secretos",
-        rank12Title: "Los Mejores Museos de Historia Natural"
+        rank12Title: "Los Mejores Museos de Historia Natural",
+        backTop10: "← Top 10"
     }
 };
 
 let lang = 'en';
-// Détection de la langue depuis l'URL (?lang=fr, ?lang=es)
+// Détection de la langue : 1) URL param, 2) navigator.language
 (function detectLangFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const urlLang = params.get('lang');
     if (urlLang && ['en', 'fr', 'es'].includes(urlLang)) {
         lang = urlLang;
+        return;
     }
+    // Auto-detect from browser language
+    const navLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase().substring(0, 2);
+    if (['fr'].includes(navLang)) { lang = 'fr'; }
+    else if (['es'].includes(navLang)) { lang = 'es'; }
+    else { lang = 'en'; }
 })();
 let searchTimeout = null;
 let currentFilter = 'all';
@@ -2368,7 +2430,23 @@ function setFilter(filter, btn) {
     currentFilter = filter;
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    if (filter === 'all') {
+        window._showAllMuseums = true;
+    } else {
+        window._showAllMuseums = false;
+    }
     searchMuseums();
+}
+
+function backToTop10() {
+    window._showAllMuseums = false;
+    currentFilter = 'all';
+    currentCountry = '';
+    document.getElementById('citySearch').value = '';
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.filter-btn').classList.add('active');
+    searchMuseums();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function setView(view, btn) {
@@ -2399,13 +2477,19 @@ function searchMuseums() {
 
     // Détermine si une recherche est active
     const isSearchActive = input !== '' || currentCountry !== '' || currentFilter !== 'all';
+    // showAll: quand le bouton "All" est explicitement cliqué
+    const showAllMuseums = window._showAllMuseums || false;
 
     // Affiche/cache les sections selon l'état
-    if (rankingsSection) rankingsSection.style.display = isSearchActive ? 'none' : '';
-    if (mainEl) mainEl.style.display = isSearchActive ? '' : 'none';
-    if (statsBar) statsBar.style.display = isSearchActive ? '' : 'none';
+    if (rankingsSection) rankingsSection.style.display = (isSearchActive || showAllMuseums) ? 'none' : '';
+    if (mainEl) mainEl.style.display = (isSearchActive || showAllMuseums) ? '' : 'none';
+    if (statsBar) statsBar.style.display = (isSearchActive || showAllMuseums) ? '' : 'none';
 
-    if (!isSearchActive) return;
+    // Afficher le bouton "Retour Top 10" quand on n'est pas sur la page d'accueil
+    const backTop10Btn = document.getElementById('backTop10Btn');
+    if (backTop10Btn) backTop10Btn.style.display = (isSearchActive || showAllMuseums) ? 'inline-flex' : 'none';
+
+    if (!isSearchActive && !showAllMuseums) return;
 
     let filtered = museums;
 
