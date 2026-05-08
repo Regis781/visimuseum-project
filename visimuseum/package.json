@@ -26,8 +26,6 @@
     "typescript": "^5.4.5"
   },
   "overrides": {
-    "@tanstack/router-generator": "1.120.20",
-    "@tanstack/router-plugin": "1.120.20",
-    "@tanstack/router-core": "1.120.20"
+    "@tanstack/router-generator": "1.120.20"
   }
 }
