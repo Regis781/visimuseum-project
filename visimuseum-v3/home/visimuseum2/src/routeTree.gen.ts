@@ -9,15 +9,28 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TopMuseesRouteImport } from './routes/top-musees'
 import { Route as RankingsRouteImport } from './routes/rankings'
+import { Route as GratuitsRouteImport } from './routes/gratuits'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PaysIndexRouteImport } from './routes/pays/index'
 import { Route as MuseumsIndexRouteImport } from './routes/museums/index'
 import { Route as MuseumsSlugRouteImport } from './routes/museums/$slug'
 
+const TopMuseesRoute = TopMuseesRouteImport.update({
+  id: '/top-musees',
+  path: '/top-musees',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RankingsRoute = RankingsRouteImport.update({
   id: '/rankings',
   path: '/rankings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GratuitsRoute = GratuitsRouteImport.update({
+  id: '/gratuits',
+  path: '/gratuits',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -28,6 +41,11 @@ const AboutRoute = AboutRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaysIndexRoute = PaysIndexRouteImport.update({
+  id: '/pays/',
+  path: '/pays/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MuseumsIndexRoute = MuseumsIndexRouteImport.update({
@@ -44,48 +62,99 @@ const MuseumsSlugRoute = MuseumsSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/gratuits': typeof GratuitsRoute
   '/rankings': typeof RankingsRoute
+  '/top-musees': typeof TopMuseesRoute
   '/museums/$slug': typeof MuseumsSlugRoute
   '/museums/': typeof MuseumsIndexRoute
+  '/pays/': typeof PaysIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/gratuits': typeof GratuitsRoute
   '/rankings': typeof RankingsRoute
+  '/top-musees': typeof TopMuseesRoute
   '/museums/$slug': typeof MuseumsSlugRoute
   '/museums': typeof MuseumsIndexRoute
+  '/pays': typeof PaysIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/gratuits': typeof GratuitsRoute
   '/rankings': typeof RankingsRoute
+  '/top-musees': typeof TopMuseesRoute
   '/museums/$slug': typeof MuseumsSlugRoute
   '/museums/': typeof MuseumsIndexRoute
+  '/pays/': typeof PaysIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/rankings' | '/museums/$slug' | '/museums/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/gratuits'
+    | '/rankings'
+    | '/top-musees'
+    | '/museums/$slug'
+    | '/museums/'
+    | '/pays/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/rankings' | '/museums/$slug' | '/museums'
-  id: '__root__' | '/' | '/about' | '/rankings' | '/museums/$slug' | '/museums/'
+  to:
+    | '/'
+    | '/about'
+    | '/gratuits'
+    | '/rankings'
+    | '/top-musees'
+    | '/museums/$slug'
+    | '/museums'
+    | '/pays'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/gratuits'
+    | '/rankings'
+    | '/top-musees'
+    | '/museums/$slug'
+    | '/museums/'
+    | '/pays/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  GratuitsRoute: typeof GratuitsRoute
   RankingsRoute: typeof RankingsRoute
+  TopMuseesRoute: typeof TopMuseesRoute
   MuseumsSlugRoute: typeof MuseumsSlugRoute
   MuseumsIndexRoute: typeof MuseumsIndexRoute
+  PaysIndexRoute: typeof PaysIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/top-musees': {
+      id: '/top-musees'
+      path: '/top-musees'
+      fullPath: '/top-musees'
+      preLoaderRoute: typeof TopMuseesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rankings': {
       id: '/rankings'
       path: '/rankings'
       fullPath: '/rankings'
       preLoaderRoute: typeof RankingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gratuits': {
+      id: '/gratuits'
+      path: '/gratuits'
+      fullPath: '/gratuits'
+      preLoaderRoute: typeof GratuitsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -100,6 +169,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pays/': {
+      id: '/pays/'
+      path: '/pays'
+      fullPath: '/pays/'
+      preLoaderRoute: typeof PaysIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/museums/': {
@@ -122,9 +198,12 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  GratuitsRoute: GratuitsRoute,
   RankingsRoute: RankingsRoute,
+  TopMuseesRoute: TopMuseesRoute,
   MuseumsSlugRoute: MuseumsSlugRoute,
   MuseumsIndexRoute: MuseumsIndexRoute,
+  PaysIndexRoute: PaysIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
