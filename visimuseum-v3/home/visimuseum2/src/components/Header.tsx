@@ -32,6 +32,7 @@ export function Header() {
             ["/top-musees", "Top 20"],
             ["/gratuits", "Gratuits"],
             ["/rankings", "Classements"],
+            ["/about", "À propos"],
           ].map(([to, label]) => (
             <Link key={to} to={to} className={`transition-colors hover:text-gold ${isActive(to) ? "text-gold" : "text-muted-foreground"}`}>
               {label}
