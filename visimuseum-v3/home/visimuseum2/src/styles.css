@@ -17,6 +17,7 @@
   --color-muted-foreground: #6b6358;
   --color-hairline: rgba(201, 168, 76, 0.10);
   --shadow-gold: 0 4px 32px -4px rgba(201, 168, 76, 0.30);
+  --shadow-card: 0 2px 24px -4px rgba(0,0,0,0.5);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,19 +26,23 @@ html {
   background: #0e0d0b;
   color: #f0ece4;
   font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
 }
 
-::selection {
-  background: rgba(201, 168, 76, 0.25);
-  color: #f0ece4;
-}
+/* ─── Sélection ─── */
+::selection { background: rgba(201,168,76,0.25); color: #f0ece4; }
 
+/* ─── Scrollbar ─── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #0e0d0b; }
-::-webkit-scrollbar-thumb { background: rgba(201, 168, 76, 0.2); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(201, 168, 76, 0.4); }
+::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(201,168,76,0.4); }
+
+/* ─── Utilitaires typographie ─── */
+.font-display { font-family: 'Cormorant Garamond', Georgia, serif; }
 
 .text-gradient-gold {
   background: linear-gradient(135deg, #C9A84C 0%, #f0d98a 50%, #C9A84C 100%);
@@ -46,23 +51,105 @@ html {
   background-clip: text;
 }
 
-.font-display { font-family: 'Cormorant Garamond', Georgia, serif; }
-
-/* Tailwind CSS variable mappings */
-.bg-background { background-color: #0e0d0b; }
-.bg-secondary { background-color: #1a1814; }
-.bg-muted { background-color: #1a1814; }
-.text-foreground { color: #f0ece4; }
+/* ─── Couleurs Tailwind ─── */
+.bg-background  { background-color: #0e0d0b; }
+.bg-secondary   { background-color: #1a1814; }
+.bg-muted       { background-color: #1a1814; }
+.text-foreground       { color: #f0ece4; }
 .text-muted-foreground { color: #6b6358; }
-.text-gold { color: #C9A84C; }
-.bg-gold { background-color: #C9A84C; }
-.text-background { color: #0e0d0b; }
-.border-hairline { border-color: rgba(201, 168, 76, 0.10); }
-.bg-hairline { background-color: rgba(201, 168, 76, 0.10); }
-.shadow-gold { box-shadow: 0 4px 32px -4px rgba(201, 168, 76, 0.30); }
+.text-gold      { color: #C9A84C; }
+.bg-gold        { background-color: #C9A84C; }
+.text-background{ color: #0e0d0b; }
+.border-hairline{ border-color: rgba(201,168,76,0.10); }
+.bg-hairline    { background-color: rgba(201,168,76,0.10); }
+.shadow-gold    { box-shadow: 0 4px 32px -4px rgba(201,168,76,0.30); }
+.shadow-card    { box-shadow: 0 2px 24px -4px rgba(0,0,0,0.5); }
 
+/* ─── Sections : système d'espacement généreux ─── */
+/* Toutes les sections avec .section-gap reçoivent un padding vertical confortable */
+.section-gap { padding-top: 7rem; padding-bottom: 7rem; }
+.section-gap-sm { padding-top: 4rem; padding-bottom: 4rem; }
+
+/* ─── Cards : hover doux + ombre ─── */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.15s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 40px -8px rgba(201,168,76,0.15);
+}
+
+/* ─── Eyebrow label au-dessus des titres ─── */
+.eyebrow {
+  font-size: 0.65rem;
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: rgba(201,168,76,0.55);
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+/* ─── Ligne décorative dorée sous les titres de section ─── */
+.title-underline {
+  display: inline-block;
+  position: relative;
+}
+.title-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 2.5rem;
+  height: 1px;
+  background: linear-gradient(to right, rgba(201,168,76,0.6), transparent);
+}
+
+/* ─── Divider doré ─── */
+.divider-gold {
+  height: 1px;
+  background: linear-gradient(to right, rgba(201,168,76,0.25), rgba(201,168,76,0.06), transparent);
+  margin: 0;
+}
+
+/* ─── Page wrapper standard ─── */
+.page-main {
+  /* pt-32 = 8rem pour compenser le header fixe + avoir de l'air */
+  padding-top: 8rem;
+  padding-bottom: 7rem;
+}
+
+/* ─── Tag / chip ─── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(201,168,76,0.15);
+  color: #6b6358;
+  background: #1a1814;
+}
+.chip-gold {
+  background: rgba(201,168,76,0.08);
+  color: #C9A84C;
+  border-color: rgba(201,168,76,0.25);
+}
+
+/* ─── Animations ─── */
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  50%       { transform: translateY(-8px); }
 }
 .animate-bounce { animation: bounce 2s ease-in-out infinite; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fadeUp 0.5s ease both; }
+
+/* ─── Prose ─── */
+.prose-vm p { color: #6b6358; line-height: 1.75; margin-bottom: 1.25rem; }
+.prose-vm strong { color: #f0ece4; }
+.prose-vm h3 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.35rem; color: #f0ece4; margin-bottom: 0.75rem; margin-top: 0; }

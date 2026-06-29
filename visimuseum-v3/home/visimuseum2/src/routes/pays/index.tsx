@@ -7,9 +7,7 @@ export const Route = createFileRoute("/pays/")({
   head: () => ({
     meta: [
       { title: "Musées par pays — Guide mondial | VisiMuseum" },
-      { name: "description", content: `Explorez les musées par pays : France, Italie, Japon, États-Unis... Guide complet des musées dans ${[...new Set(museums.map(m=>m.country))].length} pays du monde.` },
-      { name: "keywords", content: "musées par pays, musées france, musées italie, musées japon, musées états-unis, musées monde" },
-      { property: "og:title", content: "Musées par pays | VisiMuseum" },
+      { name: "description", content: `Explorez les musées par pays dans ${[...new Set(museums.map(m=>m.country))].length} destinations.` },
       { property: "og:url", content: "https://www.visimuseum.com/pays" },
     ],
     links: [{ rel: "canonical", href: "https://www.visimuseum.com/pays" }],
@@ -30,39 +28,38 @@ function PaysIndexPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="mx-auto max-w-6xl px-6 pt-28 pb-24 w-full">
-        <p className="text-xs uppercase tracking-widest text-gold/60 mb-2">Destination</p>
-        <h1 className="font-display text-5xl md:text-6xl mb-4">Musées par pays</h1>
-        <p className="text-xl text-muted-foreground mb-12 max-w-2xl">
-          Explorez les musées nation par nation. {[...new Set(museums.map(m => m.country))].length} pays référencés, des collections uniques à chaque escale.
+      <main className="mx-auto max-w-6xl px-6 page-main w-full">
+        <span className="eyebrow">Destination</span>
+        <h1 className="font-display text-5xl md:text-6xl mb-5 title-underline">Musées par pays</h1>
+        <p className="text-xl text-muted-foreground mt-7 mb-16 max-w-2xl">
+          {[...new Set(museums.map(m => m.country))].length} pays référencés, des collections uniques à chaque escale.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {byCountry.map(({ name, count, free, slug, top }) => (
             <Link key={name} to="/pays/$country" params={{ country: slug }}
-              className="group p-6 border border-hairline rounded-lg bg-secondary/20 hover:border-gold/30 hover:bg-secondary/50 transition-all"
+              className="group p-7 border border-hairline rounded-2xl bg-secondary/20 card-hover hover:border-gold/25"
             >
-              <h2 className="font-display text-2xl mb-1 group-hover:text-gradient-gold transition-all">{name}</h2>
-              <p className="text-sm text-muted-foreground mb-3">
+              <h2 className="font-display text-2xl mb-1.5 group-hover:text-gradient-gold transition-all">{name}</h2>
+              <p className="text-sm text-muted-foreground mb-4">
                 {count} musée{count > 1 ? "s" : ""}
                 {free > 0 && <span className="text-gold ml-2">· {free} gratuit{free > 1 ? "s" : ""}</span>}
               </p>
-              {top && <p className="text-xs text-muted-foreground/50 line-clamp-1">✦ {top.name}</p>}
+              {top && <p className="text-xs text-muted-foreground/40 line-clamp-1">✦ {top.name}</p>}
             </Link>
           ))}
         </div>
 
-        {/* SEO content */}
-        <div className="mt-16 border-t border-hairline pt-12">
-          <h2 className="font-display text-3xl mb-6">Les grandes destinations muséales</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-muted-foreground leading-relaxed text-sm">
+        <div className="mt-20 border-t border-hairline pt-14">
+          <h2 className="font-display text-3xl mb-8">Les grandes destinations muséales</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 prose-vm">
             <div>
-              <h3 className="font-display text-xl text-foreground mb-3">Europe</h3>
-              <p>L'Europe concentre les plus grandes collections artistiques mondiales. La <strong className="text-foreground">France</strong> avec son Louvre, l'<strong className="text-foreground">Italie</strong> et ses galeries de la Renaissance, le <strong className="text-foreground">Royaume-Uni</strong> avec le British Museum gratuit... Le continent européen reste la première destination muséale mondiale.</p>
+              <h3>Europe</h3>
+              <p>L'Europe concentre les plus grandes collections artistiques mondiales. La <strong>France</strong> avec son Louvre, l'<strong>Italie</strong> et ses galeries de la Renaissance, le <strong>Royaume-Uni</strong> avec le British Museum gratuit...</p>
             </div>
             <div>
-              <h3 className="font-display text-xl text-foreground mb-3">Asie</h3>
-              <p>La <strong className="text-foreground">Chine</strong> abrite les musées les plus visités du monde : la Cité Interdite accueille 19 millions de visiteurs par an. Le <strong className="text-foreground">Japon</strong> avec son Tokyo National Museum et ses expériences numériques teamLab offre une vision unique de la culture.</p>
+              <h3>Asie</h3>
+              <p>La <strong>Chine</strong> abrite les musées les plus visités du monde : la Cité Interdite accueille 19 millions de visiteurs par an. Le <strong>Japon</strong> offre avec teamLab une vision unique de la culture numérique.</p>
             </div>
           </div>
         </div>
